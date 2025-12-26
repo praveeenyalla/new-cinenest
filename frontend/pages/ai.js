@@ -28,9 +28,18 @@ export default function AICommandCenter() {
 
   const fetchHistory = async (email) => {
     try {
-      const res = await fetch(`${API_URL}/ai/history/${email}`);
-      const data = await res.json();
-      setHistory(data);
+      const token = localStorage.getItem('userToken') || localStorage.getItem('adminToken');
+      if (!token) return;
+
+      const res = await fetch(`${API_URL}/ai/history`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setHistory(data);
+      }
     } catch (err) {
       console.error("Failed to fetch history", err);
     }
@@ -48,17 +57,26 @@ export default function AICommandCenter() {
     setLoading(true);
 
     try {
+      const token = localStorage.getItem('userToken') || localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/ai/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ user_email: userEmail, message: text, category }),
       });
+
+      if (response.status === 401) {
+        setMessages(prev => [...prev, { role: 'ai', text: 'Authentication failed. Please login to use Brain Engine.' }]);
+        return;
+      }
 
       const data = await response.json();
 
       const aiMsg = {
         role: 'ai',
-        text: data.text,
+        text: data.response || data.text, // Handle backend returning "response" or "text"
         chartData: data.chartData,
         chartType: data.chartType
       };
@@ -94,42 +112,6 @@ export default function AICommandCenter() {
       <Head>
         <title>CINE NEST - AI Command Center</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-        <script dangerouslySetInnerHTML={{
-          __html: `
-                tailwind.config = {
-                    darkMode: "class",
-                    theme: {
-                        extend: {
-                            colors: {
-                                "primary": "#e60a15",
-                                "background-light": "#f8f5f6",
-                                "background-dark": "#050505",
-                                "surface-dark": "#121212",
-                                "surface-light": "#2a1a1b",
-                            },
-                            fontFamily: {
-                                "display": ["Space Grotesk", "sans-serif"],
-                                "body": ["Noto Sans", "sans-serif"],
-                            },
-                            animation: {
-                                'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                                'glow': 'glow 3s ease-in-out infinite alternate',
-                                'spin-slow': 'spin 12s linear infinite',
-                            },
-                            keyframes: {
-                                glow: {
-                                    '0%': { boxShadow: '0 0 20px -5px #e60a15' },
-                                    '100%': { boxShadow: '0 0 40px 5px #e60a15' },
-                                }
-                            }
-                        },
-                    },
-                }
-            `
-        }} />
       </Head>
 
       {/* --- SIDEBAR --- */}

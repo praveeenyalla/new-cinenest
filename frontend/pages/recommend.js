@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import Layout from '../components/Layout';
+import { API_URL } from '../config/api';
 
 export default function RecommenderPage() {
   const [title, setTitle] = useState('');
@@ -22,7 +23,7 @@ export default function RecommenderPage() {
     setCurrentPage(1);
 
     try {
-      const response = await fetch(`http://localhost:8000/recommend?title=${encodeURIComponent(title)}&limit=20`);
+      const response = await fetch(`${API_URL}/recommend?title=${encodeURIComponent(title)}&limit=20`);
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.detail || 'Failed to fetch recommendations.');

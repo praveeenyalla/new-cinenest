@@ -1,0 +1,237 @@
+{
+    "name": "User Analysis Dark Theme",
+    "dataColors": [
+        "#2878BD",
+        "#FCB714",
+        "#0EB194",
+        "#108372",
+        "#D0E4F5",
+        "#F15628"
+    ],
+    "background": "#3a3a3a",
+    "foreground": "#FFFFFF",
+    "foregroundSecondary": "#D2D0CE",
+    "foregroundTertiary": "#979593",
+    "tableAccent": "#2878BD",
+    "visualStyles": {
+        "*": {
+            "*": {
+                "outspace": [
+                    {
+                        "color": {
+                            "solid": {
+                                "color": "#3a3a3a"
+                            }
+                        }
+                    }
+                ],
+                "border": [
+                    {
+                        "show": true,
+                        "color": {
+                            "solid": {
+                                "color": "#545454"
+                            }
+                        },
+                        "radius": 8
+                    }
+                ],
+                "visualTooltip": [
+                    {
+                        "type": "Default",
+                        "titleFontColor": {
+                            "solid": {
+                                "color": "#FFFFFF"
+                            }
+                        },
+                        "valueFontColor": {
+                            "solid": {
+                                "color": "#D2D0CE"
+                            }
+                        },
+                        "background": {
+                            "solid": {
+                                "color": "#2a2a2a"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "page": {
+            "*": {
+                "background": [
+                    {
+                        "color": {
+                            "solid": {
+                                "color": "#3a3a3a"
+                            }
+                        },
+                        "transparency": 0
+                    }
+                ]
+            }
+        },
+        "card": {
+            "*": {
+                "labels": [
+                    {
+                        "color": {
+                            "solid": {
+                                "color": "#979593"
+                            }
+                        },
+                        "fontSize": 12,
+                        "fontFamily": "Arial"
+                    }
+                ],
+                "categoryLabels": [
+                    {
+                        "color": {
+                            "solid": {
+                                "color": "#FFFFFF"
+                            }
+                        },
+                        "fontSize": 14,
+                        "fontFamily": "Arial",
+                        "isBold": true
+                    }
+                ],
+                "background": [
+                    {
+                        "color": {
+                            "solid": {
+                                "color": "#454545"
+                            }
+                        },
+                        "transparency": 0
+                    }
+                ]
+            }
+        },
+        "lineChart": {
+            "*": {
+                "legend": [
+                    {
+                        "show": true,
+                        "position": "Top",
+                        "showTitle": false,
+                        "labelColor": {
+                            "solid": {
+                                "color": "#D2D0CE"
+                            }
+                        },
+                        "fontFamily": "Arial"
+                    }
+                ],
+                "categoryAxis": [
+                    {
+                        "show": true,
+                        "gridlineShow": false,
+                        "labelColor": {
+                            "solid": {
+                                "color": "#979593"
+                            }
+                        },
+                        "fontFamily": "Arial"
+                    }
+                ],
+                "valueAxis": [
+                    {
+                        "show": true,
+                        "gridlineShow": true,
+                        "gridlineColor": {
+                            "solid": {
+                                "color": "#545454"
+                            }
+                        },
+                        "labelColor": {
+                            "solid": {
+                                "color": "#979593"
+                            }
+                        },
+                        "fontFamily": "Arial"
+                    }
+                ]
+            }
+        },
+        "barChart": {
+            "*": {
+                "legend": [
+                    {
+                        "show": true,
+                        "labelColor": {
+                            "solid": {
+                                "color": "#D2D0CE"
+                            }
+                        }
+                    }
+                ],
+                "dataPoint": [
+                    {
+                        "fill": {
+                            "solid": {
+                                "color": "#2878BD"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "donutChart": {
+            "*": {
+                "legend": [
+                    {
+                        "show": true,
+                        "position": "Right",
+                        "labelColor": {
+                            "solid": {
+                                "color": "#D2D0CE"
+                            }
+                        }
+                    }
+                ],
+                "slices": [
+                    {
+                        "color": {
+                            "solid": {
+                                "color": "#2878BD"
+                            }
+                        }
+                    },
+                    {
+                        "color": {
+                            "solid": {
+                                "color": "#FCB714"
+                            }
+                        }
+                    },
+                    {
+                        "color": {
+                            "solid": {
+                                "color": "#0EB194"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "textClasses": {
+        "header": {
+            "fontFace": "Arial",
+            "fontSize": 24,
+            "color": "#FFFFFF"
+        },
+        "subHeader": {
+            "fontFace": "Arial",
+            "fontSize": 18,
+            "color": "#D2D0CE"
+        },
+        "label": {
+            "fontFace": "Arial",
+            "fontSize": 12,
+            "color": "#979593"
+        }
+    }
+}

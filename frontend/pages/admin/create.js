@@ -4,6 +4,7 @@ import Head from 'next/head';
 import AdminSidebar from '../../components/AdminSidebar';
 import AdminTopBar from '../../components/AdminTopBar';
 import FormInput from '../../components/FormInput';
+import { API_URL } from '../../config/api';
 
 export default function CreateContent() {
     const [formData, setFormData] = useState({
@@ -21,7 +22,7 @@ export default function CreateContent() {
 
     useEffect(() => {
         if (!localStorage.getItem('adminToken')) {
-            router.push('/admin/login');
+            router.push('/auth');
         }
     }, [router]);
 
@@ -37,7 +38,7 @@ export default function CreateContent() {
 
         const token = localStorage.getItem('adminToken');
         try {
-            const response = await fetch('http://localhost:8000/admin/content', {
+            const response = await fetch(`${API_URL}/admin/content`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

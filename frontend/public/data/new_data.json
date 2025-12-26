@@ -1,0 +1,492 @@
+[
+    {
+        "title": "Neon City",
+        "year": 2021,
+        "type": "Movie",
+        "imdb_rating": 7.4,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Hidden Code",
+        "year": 2021,
+        "type": "Movie",
+        "imdb_rating": 8.1,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Family Street",
+        "year": 2021,
+        "type": "TV Show",
+        "imdb_rating": 7.0,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Dark Corridor",
+        "year": 2021,
+        "type": "Series",
+        "imdb_rating": 8.5,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Final Hour",
+        "year": 2021,
+        "type": "Movie",
+        "imdb_rating": 7.8,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Quantum Minds",
+        "year": 2021,
+        "type": "Series",
+        "imdb_rating": 8.7,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Young Coders",
+        "year": 2021,
+        "type": "TV Show",
+        "imdb_rating": 6.8,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Cold Justice",
+        "year": 2021,
+        "type": "Movie",
+        "imdb_rating": 7.2,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Urban Myth",
+        "year": 2021,
+        "type": "Series",
+        "imdb_rating": 8.0,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Beyond Earth",
+        "year": 2021,
+        "type": "Movie",
+        "imdb_rating": 8.3,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "City Lights",
+        "year": 2021,
+        "type": "TV Show",
+        "imdb_rating": 7.1,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Broken Signal",
+        "year": 2021,
+        "type": "Series",
+        "imdb_rating": 7.9,
+        "platform": "Disney+"
+    },
+    {
+        "title": "After Midnight",
+        "year": 2021,
+        "type": "Series",
+        "imdb_rating": 8.2,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Hidden Truths",
+        "year": 2021,
+        "type": "Movie",
+        "imdb_rating": 7.6,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Street Pulse",
+        "year": 2021,
+        "type": "TV Show",
+        "imdb_rating": 6.9,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Silent Node",
+        "year": 2021,
+        "type": "Series",
+        "imdb_rating": 8.4,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Flashpoint",
+        "year": 2021,
+        "type": "Movie",
+        "imdb_rating": 7.3,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Next Gen Kids",
+        "year": 2021,
+        "type": "TV Show",
+        "imdb_rating": 6.6,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Iron District",
+        "year": 2021,
+        "type": "Series",
+        "imdb_rating": 8.1,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Last Shift",
+        "year": 2021,
+        "type": "Movie",
+        "imdb_rating": 7.7,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Red Horizon",
+        "year": 2022,
+        "type": "Movie",
+        "imdb_rating": 8.0,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Cyber Law",
+        "year": 2022,
+        "type": "Series",
+        "imdb_rating": 8.6,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Dream School",
+        "year": 2022,
+        "type": "TV Show",
+        "imdb_rating": 7.2,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Zero Day",
+        "year": 2022,
+        "type": "Movie",
+        "imdb_rating": 7.7,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Deep Space",
+        "year": 2022,
+        "type": "Series",
+        "imdb_rating": 8.9,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Metro Life",
+        "year": 2022,
+        "type": "TV Show",
+        "imdb_rating": 6.7,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "The Trial",
+        "year": 2022,
+        "type": "Movie",
+        "imdb_rating": 7.5,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Echo Room",
+        "year": 2022,
+        "type": "Series",
+        "imdb_rating": 8.1,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Final Code",
+        "year": 2022,
+        "type": "Movie",
+        "imdb_rating": 7.9,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Future Kids",
+        "year": 2022,
+        "type": "TV Show",
+        "imdb_rating": 7.3,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Cold Harbor",
+        "year": 2022,
+        "type": "Series",
+        "imdb_rating": 8.4,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Night Ride",
+        "year": 2022,
+        "type": "Movie",
+        "imdb_rating": 7.1,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Open Source",
+        "year": 2022,
+        "type": "Series",
+        "imdb_rating": 8.0,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Home Makers",
+        "year": 2022,
+        "type": "TV Show",
+        "imdb_rating": 6.9,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Silent Case",
+        "year": 2022,
+        "type": "Movie",
+        "imdb_rating": 7.8,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Urban Signal",
+        "year": 2022,
+        "type": "Series",
+        "imdb_rating": 8.2,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Midnight Bus",
+        "year": 2022,
+        "type": "Movie",
+        "imdb_rating": 7.4,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Junior Stars",
+        "year": 2022,
+        "type": "TV Show",
+        "imdb_rating": 6.8,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Iron Web",
+        "year": 2022,
+        "type": "Series",
+        "imdb_rating": 8.3,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Last Witness",
+        "year": 2022,
+        "type": "Movie",
+        "imdb_rating": 7.6,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Neon Protocol",
+        "year": 2023,
+        "type": "Movie",
+        "imdb_rating": 8.2,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Data Storm",
+        "year": 2023,
+        "type": "Series",
+        "imdb_rating": 8.8,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Galaxy Kids",
+        "year": 2023,
+        "type": "TV Show",
+        "imdb_rating": 7.4,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Black Channel",
+        "year": 2023,
+        "type": "Movie",
+        "imdb_rating": 7.9,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Shadow Network",
+        "year": 2023,
+        "type": "Series",
+        "imdb_rating": 8.6,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Metro Teens",
+        "year": 2023,
+        "type": "TV Show",
+        "imdb_rating": 6.9,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Red Sector",
+        "year": 2023,
+        "type": "Movie",
+        "imdb_rating": 8.1,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Pulse Check",
+        "year": 2023,
+        "type": "Series",
+        "imdb_rating": 8.3,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Next Wave",
+        "year": 2023,
+        "type": "TV Show",
+        "imdb_rating": 7.0,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Final Node",
+        "year": 2023,
+        "type": "Movie",
+        "imdb_rating": 7.6,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Echo Future",
+        "year": 2024,
+        "type": "Movie",
+        "imdb_rating": 8.4,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Quantum Line",
+        "year": 2024,
+        "type": "Series",
+        "imdb_rating": 9.0,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Magic Street",
+        "year": 2024,
+        "type": "TV Show",
+        "imdb_rating": 7.5,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Dark Frame",
+        "year": 2024,
+        "type": "Movie",
+        "imdb_rating": 8.0,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Iron Signal",
+        "year": 2024,
+        "type": "Series",
+        "imdb_rating": 8.7,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Urban Kids",
+        "year": 2024,
+        "type": "TV Show",
+        "imdb_rating": 7.2,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Last Horizon",
+        "year": 2024,
+        "type": "Movie",
+        "imdb_rating": 8.1,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Deep Current",
+        "year": 2024,
+        "type": "Series",
+        "imdb_rating": 8.5,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Bright Minds",
+        "year": 2024,
+        "type": "TV Show",
+        "imdb_rating": 7.3,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Signal Run",
+        "year": 2024,
+        "type": "Movie",
+        "imdb_rating": 7.9,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Neon Age",
+        "year": 2025,
+        "type": "Movie",
+        "imdb_rating": 8.6,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Future Grid",
+        "year": 2025,
+        "type": "Series",
+        "imdb_rating": 9.2,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Star Kids",
+        "year": 2025,
+        "type": "TV Show",
+        "imdb_rating": 7.6,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Final Circuit",
+        "year": 2025,
+        "type": "Movie",
+        "imdb_rating": 8.3,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Shadow Era",
+        "year": 2025,
+        "type": "Series",
+        "imdb_rating": 8.9,
+        "platform": "Netflix"
+    },
+    {
+        "title": "City Teens",
+        "year": 2025,
+        "type": "TV Show",
+        "imdb_rating": 7.1,
+        "platform": "Prime Video"
+    },
+    {
+        "title": "Echo Point",
+        "year": 2025,
+        "type": "Movie",
+        "imdb_rating": 8.0,
+        "platform": "Netflix"
+    },
+    {
+        "title": "Pulse Future",
+        "year": 2025,
+        "type": "Series",
+        "imdb_rating": 8.7,
+        "platform": "Hulu"
+    },
+    {
+        "title": "Bright Stars",
+        "year": 2025,
+        "type": "TV Show",
+        "imdb_rating": 7.4,
+        "platform": "Disney+"
+    },
+    {
+        "title": "Last Signal",
+        "year": 2025,
+        "type": "Movie",
+        "imdb_rating": 8.2,
+        "platform": "Prime Video"
+    }
+]

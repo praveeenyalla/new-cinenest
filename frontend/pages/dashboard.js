@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { API_URL } from "../config/api";
+import UserAnalytics from "../components/UserAnalytics";
 
 export default function Dashboard() {
   const [platformStats, setPlatformStats] = useState([]);
@@ -30,7 +31,7 @@ export default function Dashboard() {
     return platform ? platform.count.toLocaleString() : "Loading...";
   };
 
-  const tabs = ["All Platforms", "Netflix", "Prime Video", "Hulu", "Disney+"];
+  const tabs = ["All Platforms", "Netflix", "Prime Video", "Hulu", "Disney+", "User Analysis"];
 
   // Helper for conditional rendering
   const showPlatform = (p) => activeTab === "All" || activeTab === "All Platforms" || activeTab === p;
@@ -362,6 +363,7 @@ export default function Dashboard() {
             </div>
           )}
 
+
           {/* Hulu Card */}
           {showPlatform("Hulu") && (
             <div className="bg-surface-dark border border-border-dark rounded-xl p-6 flex flex-col gap-6 relative overflow-hidden hover:border-primary/30 transition-colors">
@@ -408,6 +410,14 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+
+          {/* User Analysis Section */}
+          {activeTab === "User Analysis" && (
+            <div className="col-span-1 lg:col-span-2">
+              <UserAnalytics />
             </div>
           )}
 

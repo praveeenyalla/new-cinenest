@@ -13,8 +13,19 @@ from routes.dataset_analysis import router as AnalysisRouter
 from routes.admin import router as AdminRouter
 from routes.auth import router as AuthRouter
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 app = FastAPI(title="OTT Platform API")
+
+# Debugging 422 Errors
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    print(f"Validation Error: {exc}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors(), "body": str(exc.body)},
+    )
 
 # Enable CORS
 app.add_middleware(
@@ -38,3 +49,7 @@ app.include_router(AuthRouter, prefix="/auth")
 @app.get("/")
 def home():
     return {"message": "OTT API running successfully!"}
+
+@app.on_event("startup")
+async def startup_event():
+    print("Backend Server Started - Routes Loaded")

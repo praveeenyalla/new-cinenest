@@ -13,7 +13,7 @@ const getApiUrl = () => {
         }
     }
 
-    // Default to localhost for local development
+    // Default to localhost:8000 for local development
     return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 };
 

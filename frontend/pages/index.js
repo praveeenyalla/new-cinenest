@@ -2,11 +2,14 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { API_URL } from '../config/api';
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [curatedData, setCuratedData] = useState({ trending_now: [], top_rated: [], netflix_new: [] });
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -16,7 +19,36 @@ export default function Home() {
       setIsLoggedIn(true);
       setUsername(storedUser || 'User');
     }
+
+    const fetchCurated = async () => {
+      try {
+        const res = await fetch(`${API_URL}/ai/curated`);
+        if (res.ok) {
+          const data = await res.json();
+          setCuratedData(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch curated content", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCurated();
   }, []);
+
+  // reliable backdrops for demo
+  const backdrops = [
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuACge5918lWCM_VF6J-qN0KboiWAxJIHifwa6uIbtMrZ6Cr5RmumxGZv-n4vqgprkR0G6u4uMLF8K-mann5ShPykDb28PS89oOWYzmtq19hpJMoT02zUrF7zMj-SH5lQ7N5Yfo_JbLCac7GV1Ok8nUDu01YVV9IvQfyGdA-i_ytM0h-P4mtIhW18T6yZ6bkY3S_EeL9gsBGL43yx01rvg_rlaBzT6uiuJP9XcPryzbr1jGR3P8yqrmC4npIat0P0UMFe3GSuK6gqLM",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuDsbZDKu32l_pJhTn73wQVeKS7Aum8vLPKPDfgtiNSB7E8S76j81tcBsN-RaDPKZyw37NX4YdCi_LODqAU19T7lsI3qxd6eJG4PZWndWTwbm5ZdOvkjuPuNWT6QSfx6Boa7JLnsOjYVpsKK1wPUC5NMlHDAM2wrnDQbznTQg-drHmoqBw_FJel8LSaxVRi6qoJ7upG1_rOu3YT0ryx10f9RBbcwlyjJMYYiNckfyocf8OC4faMkYKngfSk3YSJei1ILN9jWKJtzd4M",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCOElLHQWIHQJjnA7rban0-GvwSltC78yCRqFQ1u-aatyhYF40-fl-4Kd68giZraF38-XTYc_FzCJOwFS8MITmgbbLIZtHc7oRj92LUmq9jQkaiWUtifpsx7gNAvKgbijTAGpxkwpxwR1uERvFPeyHnI4W0rRcJoOuFP4ZDfWayImj6oxU79UTt5RkyyrG9Wsd7uDwcOeB9-mPpAxcbqVjbcWDX9zLSSs_cXMEjngirJ-amVTH2VjUolQEihMBmymsJqo9YlYVvl9Q",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuD2-UKyS86fskUIhJel8zR1CKOcDb_gmECIOVdhxjgY_oHx1NiViyHobXMv1xmujRsAVYFkjXKfoUK5n6xxQ6mzhNU3dqRZTYSKB-P_LHRLzPR8tI4THUL5zikufmY3lijlrnGy5O6AYTBELd-USp7-1safy6s_AxHATrgRi_kkgtiqlbq-J-8_ReV7k8MHdnMRnN62CyvLGe5vuWPy6LDu_On3gsv61x928tr_I-GydjBI2X1qrV6DKptaK_rPZ-HpQLKf19YIb_U",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCqglCDd2tKlQA4-cC9713Qp2zbNvfMoOicEz5x1_vMihDBluAVSQ7skNk12kqMSf7l5t-Ys9n3fid9BIOO84TfW2XRKjJr1b8qAhD_pZE7tXkM6iI86ns3A2noItZuw09W1ojduyXurLu-RHlbzMVyrJOPUCM1Lsq4hwtfMurCUikd43Xz2LR9t_-5Mexdj9q-jsoH7YFqQ6Ka37T3LBJXptAgTm6-c_9kPxDVckcajKpgJTov1ILNfPzawIzh9wpRlsDM91_9kII",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuAcKdHtjWP6lVycv9m75zrseoWdh1teUjZrz6SPE2Focxt3XSa5KZkek0Smv0Y6TBNz2s8U0LvMnI6PCpxv9zRTfXMC6i7MqpK9Q77bI4XBDe0mtPbWWYAXPoI3xrBxbj94KArzDhttIEXdPY9kkyIukV7hbUYsKUTMBz-HbO8xRdmXn51C6oubeIcFfAMsJ8m3lFI-A4ouqkZaN0mD1MzAA-bSS1urOeHsq1-D6WCnQd3plAb4j-RkXH1g7t-KYvE0QCIOr_9yZzI",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuB8K36rCQfLGj828ZEJfTcoiYpIuX1bhxPWnzgJltPmiyGRmdcc2AVGv88tRF8HXNR82-76bkKMYLFaer4EVnvrrtVW1p4-voAH8t_mmdL7UZmFU4VtqagTeJwPQdPlkloHq3H2kN6kgmrCRpYRNZKpOE-fbxXDFN1BDEf_7mfYGA4RFHIFpDkfyMBkKYPfgFwYWvp7awx5g0c0Fashh1c-H8vAYenr2J1UDnRZ5tvVnMrsTDaSQILWQD3A95KJLE9y0IFI6SnKlWM",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBpS99wTSGUaa0MZLOoU_nVWNHi3TZLYaUwf1Hp-9GA983psQUupf3ZJ9dZzklwtlWH1BMNoAmex962KbnRxtGZsECyAlj_uRP5kU_0UWjjdC55WVQOc_yy_x_PrY2tBZ3JM4Nme6354rb8eYjAoGMJ0hmqRASXy54edKhus-BE_VvEnxHstA6lbnokiYknozDoiWqO5mG2zvO3RQWfjyqcgzz2OAF_vSdnCmYEf5KmKHRKF6nL4foKszTQj-CF84C2Jimm43YDKz8"
+  ];
+
+  const getRandomBackdrop = (index) => backdrops[index % backdrops.length];
 
   const handleLogout = () => {
     localStorage.removeItem('userToken');
@@ -251,147 +283,67 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Dynamic AI Curated: Trending Now */}
         <section className="py-20 bg-black">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex items-end justify-between mb-10">
               <div>
-                <h2 className="text-3xl font-bold mb-2">High Confidence Matches</h2>
-                <p className="text-gray-500">Based on your recent viewing of Sci-Fi Thrillers</p>
+                <h2 className="text-3xl font-bold mb-2">Happening Now</h2>
+                <p className="text-gray-500">AI-Curated Trending from New 2024-2025 Data</p>
               </div>
               <Link href="/dashboard" className="text-primary text-sm font-bold uppercase tracking-widest hover:text-white transition-colors flex items-center gap-1">
                 View All <span className="material-symbols-outlined text-lg">arrow_forward</span>
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              <div className="group relative aspect-[2/3] bg-surface-dark rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/50">
-                <div className="absolute top-2 right-2 z-20 bg-primary/90 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">98%</div>
-                <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuACge5918lWCM_VF6J-qN0KboiWAxJIHifwa6uIbtMrZ6Cr5RmumxGZv-n4vqgprkR0G6u4uMLF8K-mann5ShPykDb28PS89oOWYzmtq19hpJMoT02zUrF7zMj-SH5lQ7N5Yfo_JbLCac7GV1Ok8nUDu01YVV9IvQfyGdA-i_ytM0h-P4mtIhW18T6yZ6bkY3S_EeL9gsBGL43yx01rvg_rlaBzT6uiuJP9XcPryzbr1jGR3P8yqrmC4npIat0P0UMFe3GSuK6gqLM')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                  <h4 className="text-white font-bold text-lg truncate">Stellar Drift</h4>
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>2024</span> • <span>Sci-Fi</span> • <span>2h 14m</span>
+            {loading ? (
+              <div className="text-white">Loading Intelligence...</div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {(curatedData.trending_now || []).slice(0, 5).map((item, index) => (
+                  <div key={index} className="group relative aspect-[2/3] bg-surface-dark rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/50">
+                    <div className="absolute top-2 right-2 z-20 bg-primary/90 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">{item.imdb} ★</div>
+                    <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: `url('${getRandomBackdrop(index)}')` }}></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity"></div>
+                    <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                      <h4 className="text-white font-bold text-lg truncate">{item.title}</h4>
+                      <div className="flex items-center gap-2 text-xs text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>{item.year}</span> • <span>{(item.genres || []).slice(0, 1) || 'Movie'}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-              <div className="group relative aspect-[2/3] bg-surface-dark rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/50">
-                <div className="absolute top-2 right-2 z-20 bg-green-500/90 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">New</div>
-                <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDsbZDKu32l_pJhTn73wQVeKS7Aum8vLPKPDfgtiNSB7E8S76j81tcBsN-RaDPKZyw37NX4YdCi_LODqAU19T7lsI3qxd6eJG4PZWndWTwbm5ZdOvkjuPuNWT6QSfx6Boa7JLnsOjYVpsKK1wPUC5NMlHDAM2wrnDQbznTQg-drHmoqBw_FJel8LSaxVRi6qoJ7upG1_rOu3YT0ryx10f9RBbcwlyjJMYYiNckfyocf8OC4faMkYKngfSk3YSJei1ILN9jWKJtzd4M')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                  <h4 className="text-white font-bold text-lg truncate">Neon Shadows</h4>
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>2023</span> • <span>Thriller</span> • <span>1h 58m</span>
-                  </div>
-                </div>
-              </div>
-              <div className="group relative aspect-[2/3] bg-surface-dark rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/50">
-                <div className="absolute top-2 right-2 z-20 bg-primary/90 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">94%</div>
-                <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCOElLHQWIHQJjnA7rban0-GvwSltC78yCRqFQ1u-aatyhYF40-fl-4Kd68giZraF38-XTYc_FzCJOwFS8MITmgbbLIZtHc7oRj92LUmq9jQkaiWUtifpsx7gNAvKgbijTAGpxkwpxwR1uERvFPeyHnI4W0rRcJoOuFP4ZDfWayImj6oxU79UTt5RkyyrG9Wsd7uDwcOeB9-mPpAxcbqVjbcWDX9zLSSs_cXMEjngirJ-amVTH2VjUolQEihMBmymsJqo9YlYVvl9Q')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                  <h4 className="text-white font-bold text-lg truncate">The Void</h4>
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>2021</span> • <span>Horror</span> • <span>1h 45m</span>
-                  </div>
-                </div>
-              </div>
-              <div className="group relative aspect-[2/3] bg-surface-dark rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/50">
-                <div className="absolute top-2 right-2 z-20 bg-primary/90 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">89%</div>
-                <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuD2-UKyS86fskUIhJel8zR1CKOcDb_gmECIOVdhxjgY_oHx1NiViyHobXMv1xmujRsAVYFkjXKfoUK5n6xxQ6mzhNU3dqRZTYSKB-P_LHRLzPR8tI4THUL5zikufmY3lijlrnGy5O6AYTBELd-USp7-1safy6s_AxHATrgRi_kkgtiqlbq-J-8_ReV7k8MHdnMRnN62CyvLGe5vuWPy6LDu_On3gsv61x928tr_I-GydjBI2X1qrV6DKptaK_rPZ-HpQLKf19YIb_U')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                  <h4 className="text-white font-bold text-lg truncate">Circuit Breaker</h4>
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>2024</span> • <span>Action</span> • <span>2h 05m</span>
-                  </div>
-                </div>
-              </div>
-              <div className="group relative aspect-[2/3] bg-surface-dark rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/50">
-                <div className="absolute top-2 right-2 z-20 bg-blue-600/90 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">Disney+</div>
-                <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCqglCDd2tKlQA4-cC9713Qp2zbNvfMoOicEz5x1_vMihDBluAVSQ7skNk12kqMSf7l5t-Ys9n3fid9BIOO84TfW2XRKjJr1b8qAhD_pZE7tXkM6iI86ns3A2noItZuw09W1ojduyXurLu-RHlbzMVyrJOPUCM1Lsq4hwtfMurCUikd43Xz2LR9t_-5Mexdj9q-jsoH7YFqQ6Ka37T3LBJXptAgTm6-c_9kPxDVckcajKpgJTov1ILNfPzawIzh9wpRlsDM91_9kII')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                  <h4 className="text-white font-bold text-lg truncate">Nebula</h4>
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>2023</span> • <span>Drama</span> • <span>2h 30m</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </section>
 
+        {/* Dynamic AI Curated: Top Rated Classics */}
         <section className="py-12 bg-surface-dark">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex items-end justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-bold mb-2 text-gray-200">Hidden Gems</h2>
-                <p className="text-gray-500 text-sm">Underrated masterpieces you might have missed</p>
+                <h2 className="text-2xl font-bold mb-2 text-gray-200">Hall of Fame</h2>
+                <p className="text-gray-500 text-sm">Top Rated Content from All Platforms</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-              <div className="group relative aspect-[2/3] bg-black rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/30">
-                <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAcKdHtjWP6lVycv9m75zrseoWdh1teUjZrz6SPE2Focxt3XSa5KZkek0Smv0Y6TBNz2s8U0LvMnI6PCpxv9zRTfXMC6i7MqpK9Q77bI4XBDe0mtPbWWYAXPoI3xrBxbj94KArzDhttIEXdPY9kkyIukV7hbUYsKUTMBz-HbO8xRdmXn51C6oubeIcFfAMsJ8m3lFI-A4ouqkZaN0mD1MzAA-bSS1urOeHsq1-D6WCnQd3plAb4j-RkXH1g7t-KYvE0QCIOr_9yZzI')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-3 left-3 right-3">
-                  <h4 className="text-white font-bold text-sm truncate">Silent Echo</h4>
-                  <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-1">
-                    <span>Drama</span> • <span>96% Match</span>
+            {loading ? (
+              <div className="text-white">Loading...</div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                {(curatedData.top_rated || []).slice(0, 6).map((item, index) => (
+                  <div key={index} className="group relative aspect-[2/3] bg-black rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/30">
+                    <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: `url('${getRandomBackdrop(index + 5)}')` }}></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <h4 className="text-white font-bold text-sm truncate">{item.title}</h4>
+                      <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-1">
+                        <span>{item.year}</span> • <span>{item.imdb} ★</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-              <div className="group relative aspect-[2/3] bg-black rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/30">
-                <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB8K36rCQfLGj828ZEJfTcoiYpIuX1bhxPWnzgJltPmiyGRmdcc2AVGv88tRF8HXNR82-76bkKMYLFaer4EVnvrrtVW1p4-voAH8t_mmdL7UZmFU4VtqagTeJwPQdPlkloHq3H2kN6kgmrCRpYRNZKpOE-fbxXDFN1BDEf_7mfYGA4RFHIFpDkfyMBkKYPfgFwYWvp7awx5g0c0Fashh1c-H8vAYenr2J1UDnRZ5tvVnMrsTDaSQILWQD3A95KJLE9y0IFI6SnKlWM')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-3 left-3 right-3">
-                  <h4 className="text-white font-bold text-sm truncate">Midnight Rain</h4>
-                  <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-1">
-                    <span>Noir</span> • <span>91% Match</span>
-                  </div>
-                </div>
-              </div>
-              <div className="group relative aspect-[2/3] bg-black rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/30">
-                <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDsbZDKu32l_pJhTn73wQVeKS7Aum8vLPKPDfgtiNSB7E8S76j81tcBsN-RaDPKZyw37NX4YdCi_LODqAU19T7lsI3qxd6eJG4PZWndWTwbm5ZdOvkjuPuNWT6QSfx6Boa7JLnsOjYVpsKK1wPUC5NMlHDAM2wrnDQbznTQg-drHmoqBw_FJel8LSaxVRi6qoJ7upG1_rOu3YT0ryx10f9RBbcwlyjJMYYiNckfyocf8OC4faMkYKngfSk3YSJei1ILN9jWKJtzd4M')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-3 left-3 right-3">
-                  <h4 className="text-white font-bold text-sm truncate">Lucid</h4>
-                  <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-1">
-                    <span>Indie</span> • <span>88% Match</span>
-                  </div>
-                </div>
-              </div>
-              <div className="group relative aspect-[2/3] bg-black rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/30">
-                <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBpS99wTSGUaa0MZLOoU_nVWNHi3TZLYaUwf1Hp-9GA983psQUupf3ZJ9dZzklwtlWH1BMNoAmex962KbnRxtGZsECyAlj_uRP5kU_0UWjjdC55WVQOc_yy_x_PrY2tBZ3JM4Nme6354rb8eYjAoGMJ0hmqRASXy54edKhus-BE_VvEnxHstA6lbnokiYknozDoiWqO5mG2zvO3RQWfjyqcgzz2OAF_vSdnCmYEf5KmKHRKF6nL4foKszTQj-CF84C2Jimm43YDKz8')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-3 left-3 right-3">
-                  <h4 className="text-white font-bold text-sm truncate">Upgrade 2.0</h4>
-                  <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-1">
-                    <span>Sci-Fi</span> • <span>93% Match</span>
-                  </div>
-                </div>
-              </div>
-              <div className="group relative aspect-[2/3] bg-black rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/30">
-                <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCOElLHQWIHQJjnA7rban0-GvwSltC78yCRqFQ1u-aatyhYF40-fl-4Kd68giZraF38-XTYc_FzCJOwFS8MITmgbbLIZtHc7oRj92LUmq9jQkaiWUtifpsx7gNAvKgbijTAGpxkwpxwR1uERvFPeyHnI4W0rRcJoOuFP4ZDfWayImj6oxU79UTt5RkyyrG9Wsd7uDwcOeB9-mPpAxcbqVjbcWDX9zLSSs_cXMEjngirJ-amVTH2VjUolQEihMBmymsJqo9YlYVvl9Q')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-3 left-3 right-3">
-                  <h4 className="text-white font-bold text-sm truncate">The Mist</h4>
-                  <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-1">
-                    <span>Horror</span> • <span>85% Match</span>
-                  </div>
-                </div>
-              </div>
-              <div className="group relative aspect-[2/3] bg-black rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/30">
-                <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuD2-UKyS86fskUIhJel8zR1CKOcDb_gmECIOVdhxjgY_oHx1NiViyHobXMv1xmujRsAVYFkjXKfoUK5n6xxQ6mzhNU3dqRZTYSKB-P_LHRLzPR8tI4THUL5zikufmY3lijlrnGy5O6AYTBELd-USp7-1safy6s_AxHATrgRi_kkgtiqlbq-J-8_ReV7k8MHdnMRnN62CyvLGe5vuWPy6LDu_On3gsv61x928tr_I-GydjBI2X1qrV6DKptaK_rPZ-HpQLKf19YIb_U')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-3 left-3 right-3">
-                  <h4 className="text-white font-bold text-sm truncate">Analog</h4>
-                  <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-1">
-                    <span>Thriller</span> • <span>89% Match</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </section>
 

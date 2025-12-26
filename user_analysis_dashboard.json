@@ -1,0 +1,350 @@
+{
+    "dashboardConfig": {
+        "title": "User Analysis",
+        "theme": {
+            "name": "Dark Analytics",
+            "colors": {
+                "background": "#3a3a3a",
+                "panelBackground": "#3B3A39",
+                "foreground": "#FFFFFF",
+                "textPrimary": "#FFFFFF",
+                "textSecondary": "#D2D0CE",
+                "textTertiary": "#979593",
+                "border": "#605e5c",
+                "dataColors": [
+                    "#2878BD",
+                    "#FCB714",
+                    "#0EB194",
+                    "#108372",
+                    "#F15628",
+                    "#D0E4F5"
+                ]
+            },
+            "fonts": {
+                "family": "Arial, sans-serif"
+            },
+            "styles": {
+                "slicers": {
+                    "backgroundColor": "#3B3A39",
+                    "textColor": "#FFFFFF",
+                    "borderColor": "#605e5c",
+                    "hoverColor": "#4a4846"
+                },
+                "cards": {
+                    "backgroundColor": "#3B3A39",
+                    "padding": "15px",
+                    "borderRadius": "4px",
+                    "boxShadow": "0 2px 4px rgba(0,0,0,0.2)"
+                },
+                "grid": {
+                    "gap": "10px",
+                    "padding": "20px"
+                }
+            }
+        },
+        "layout": {
+            "type": "single-page",
+            "containerId": "main-label-panel",
+            "style": {
+                "backgroundColor": "#3a3a3a",
+                "padding": "20px"
+            },
+            "sections": [
+                {
+                    "id": "header-section",
+                    "type": "row",
+                    "height": "auto",
+                    "items": [
+                        {
+                            "type": "title",
+                            "text": "User Analysis",
+                            "style": {
+                                "fontSize": "24px",
+                                "fontWeight": "bold",
+                                "color": "#FFFFFF"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "filters-section",
+                    "type": "row",
+                    "style": {
+                        "marginBottom": "20px"
+                    },
+                    "items": [
+                        {
+                            "id": "filter-year",
+                            "type": "slicer",
+                            "filterType": "rangeSlider",
+                            "field": "Year",
+                            "label": "Year Range",
+                            "defaultValue": [
+                                1998,
+                                2024
+                            ],
+                            "min": 1998,
+                            "max": 2024
+                        },
+                        {
+                            "id": "filter-platform",
+                            "type": "slicer",
+                            "filterType": "dropdown",
+                            "field": "Platform",
+                            "label": "Platform",
+                            "options": [
+                                "All Platforms",
+                                "Netflix",
+                                "Prime Video",
+                                "Disney+",
+                                "Hulu"
+                            ],
+                            "defaultValue": "All Platforms",
+                            "logic": {
+                                "multiSelect": false,
+                                "mappings": {
+                                    "Netflix": "Netflix",
+                                    "Prime Video": "Prime Video",
+                                    "Disney+": "Disney+",
+                                    "Hulu": "Hulu"
+                                }
+                            }
+                        },
+                        {
+                            "id": "filter-imdb",
+                            "type": "slicer",
+                            "filterType": "rangeSlider",
+                            "field": "IMDb",
+                            "label": "IMDb Rating",
+                            "min": 0,
+                            "max": 10,
+                            "step": 0.1,
+                            "defaultValue": [
+                                0,
+                                10
+                            ]
+                        },
+                        {
+                            "id": "filter-type",
+                            "type": "slicer",
+                            "filterType": "dropdown",
+                            "field": "Type",
+                            "label": "Content Type",
+                            "options": [
+                                "All",
+                                "Movie",
+                                "Series",
+                                "TV Show"
+                            ],
+                            "defaultValue": "All"
+                        }
+                    ]
+                },
+                {
+                    "id": "kpi-section",
+                    "type": "grid",
+                    "columns": 6,
+                    "gap": "15px",
+                    "style": {
+                        "marginBottom": "20px"
+                    },
+                    "items": [
+                        {
+                            "id": "kpi-total-titles",
+                            "type": "kpi",
+                            "title": "Total Titles",
+                            "calculation": "count",
+                            "field": "Title",
+                            "format": "number"
+                        },
+                        {
+                            "id": "kpi-total-movies",
+                            "type": "kpi",
+                            "title": "Total Movies",
+                            "calculation": "countIf",
+                            "field": "Type",
+                            "value": "movie",
+                            "format": "number"
+                        },
+                        {
+                            "id": "kpi-total-series",
+                            "type": "kpi",
+                            "title": "Total Series/TV Shows",
+                            "calculation": "countIf",
+                            "field": "Type",
+                            "condition": "in",
+                            "values": [
+                                "Series",
+                                "TV Show"
+                            ],
+                            "format": "number"
+                        },
+                        {
+                            "id": "kpi-avg-imdb",
+                            "type": "kpi",
+                            "title": "Avg IMDb Rating",
+                            "calculation": "average",
+                            "field": "IMDb",
+                            "format": "0.0"
+                        },
+                        {
+                            "id": "kpi-max-imdb",
+                            "type": "kpi",
+                            "title": "Highest IMDb",
+                            "calculation": "max",
+                            "field": "IMDb",
+                            "format": "0.0"
+                        },
+                        {
+                            "id": "kpi-min-imdb",
+                            "type": "kpi",
+                            "title": "Lowest IMDb",
+                            "calculation": "min",
+                            "field": "IMDb",
+                            "format": "0.0"
+                        }
+                    ]
+                },
+                {
+                    "id": "charts-row-1",
+                    "type": "grid",
+                    "columns": 2,
+                    "gap": "20px",
+                    "style": {
+                        "marginBottom": "20px",
+                        "height": "400px"
+                    },
+                    "items": [
+                        {
+                            "id": "chart-titles-year",
+                            "type": "chart",
+                            "chartType": "bar",
+                            "title": "Titles Count by Year",
+                            "xAxis": {
+                                "field": "Year",
+                                "title": "Year"
+                            },
+                            "yAxis": {
+                                "field": "Title",
+                                "aggregation": "count",
+                                "title": "Number of Titles"
+                            },
+                            "color": "#2878BD"
+                        },
+                        {
+                            "id": "chart-platform-dist",
+                            "type": "chart",
+                            "chartType": "donut",
+                            "title": "Platform-wise Distribution",
+                            "categoryField": "Platform",
+                            "valueField": "count",
+                            "colors": [
+                                "#E50914",
+                                "#00A8E1",
+                                "#113CCF",
+                                "#1CE783"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "charts-row-2",
+                    "type": "grid",
+                    "columns": 2,
+                    "gap": "20px",
+                    "style": {
+                        "marginBottom": "20px",
+                        "height": "400px"
+                    },
+                    "items": [
+                        {
+                            "id": "chart-imdb-dist",
+                            "type": "chart",
+                            "chartType": "histogram",
+                            "title": "IMDb Rating Distribution",
+                            "xAxis": {
+                                "field": "IMDb",
+                                "binSize": 1,
+                                "title": "Rating Range"
+                            },
+                            "yAxis": {
+                                "aggregation": "count",
+                                "title": "Frequency"
+                            },
+                            "color": "#FCB714"
+                        },
+                        {
+                            "id": "chart-type-breakdown",
+                            "type": "chart",
+                            "chartType": "pie",
+                            "title": "Content Type Breakdown",
+                            "categoryField": "Type",
+                            "valueField": "count",
+                            "colors": [
+                                "#0EB194",
+                                "#108372",
+                                "#F15628"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "table-section",
+                    "type": "row",
+                    "style": {
+                        "height": "400px"
+                    },
+                    "items": [
+                        {
+                            "id": "table-top-rated",
+                            "type": "grid",
+                            "title": "Top Rated Titles",
+                            "columns": [
+                                {
+                                    "field": "Title",
+                                    "header": "Title"
+                                },
+                                {
+                                    "field": "Year",
+                                    "header": "Year"
+                                },
+                                {
+                                    "field": "IMDb",
+                                    "header": "IMDb Rating"
+                                },
+                                {
+                                    "field": "Platform",
+                                    "header": "Platform"
+                                },
+                                {
+                                    "field": "Type",
+                                    "header": "Type"
+                                }
+                            ],
+                            "sort": {
+                                "field": "IMDb",
+                                "direction": "desc"
+                            },
+                            "pageSize": 50
+                        }
+                    ]
+                }
+            ]
+        },
+        "dataBinding": {
+            "source": "final_df_cleaned.json",
+            "fields": {
+                "Title": "Title",
+                "Year": "Year",
+                "IMDb": "IMDb",
+                "Type": "Type",
+                "Platform": [
+                    "Netflix",
+                    "Prime Video",
+                    "Disney+",
+                    "Hulu"
+                ]
+            }
+        }
+    }
+}

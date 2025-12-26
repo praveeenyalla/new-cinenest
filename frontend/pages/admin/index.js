@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import AdminSidebar from '../../components/AdminSidebar';
+
+import AdminAnalytics from '../../components/AdminAnalytics';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell,
@@ -107,34 +109,6 @@ export default function AdminDashboard() {
             <Head>
                 <title>CINE NEST Admin Dashboard</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-                <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-                <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-                <script dangerouslySetInnerHTML={{
-                    __html: `
-                    tailwind.config = {
-                        darkMode: "class",
-                        theme: {
-                            extend: {
-                                colors: {
-                                    "primary": "#e60a15",
-                                    "primary-dark": "#b00710",
-                                    "gunmetal": "#1c2125",
-                                    "background-dark": "#020202",
-                                },
-                                fontFamily: {
-                                    "display": ["Space Grotesk", "sans-serif"],
-                                    "sans": ["Space Grotesk", "sans-serif"]
-                                },
-                                backgroundImage: {
-                                    'tech-grid': "radial-gradient(circle at 50% 0%, rgba(230, 10, 21, 0.03) 0%, transparent 60%), linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px)",
-                                    'dashboard-pattern': "radial-gradient(circle at 15% 50%, rgba(20, 20, 20, 1) 0%, transparent 40%), radial-gradient(circle at 85% 30%, rgba(25, 25, 30, 0.8) 0%, transparent 40%)"
-                                }
-                            },
-                        },
-                    }
-                    `
-                }} />
             </Head>
 
             <style jsx global>{`
@@ -549,12 +523,28 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
+
+
+
+                    {/* Admin Analytics Section */}
+                    <section className="mt-12 mb-8">
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="material-symbols-outlined text-primary">admin_panel_settings</span>
+                            <h2 className="text-xl font-bold text-white">Admin Intelligence Panels</h2>
+                        </div>
+                        <div className="bg-surface-dark border border-white/10 rounded-xl overflow-hidden p-6 relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
+                            <AdminAnalytics />
+                        </div>
+                    </section>
+
                     <div className="mt-8 pt-8 border-t border-white/5 text-center text-xs text-gray-600 relative z-10 flex items-center justify-center gap-4">
                         <span className="h-px w-8 bg-gradient-to-r from-transparent to-gray-700"></span>
                         <p>&copy; 2024 CINE NEST Admin Console. v2.4.1 (Stable)</p>
                         <span className="h-px w-8 bg-gradient-to-l from-transparent to-gray-700"></span>
                     </div>
                 </div>
+
             </div>
         </div>
     );

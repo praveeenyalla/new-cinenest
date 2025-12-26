@@ -1,41 +1,57 @@
-import os
-from datetime import datetime, timedelta
+from fastapi import APIRouter, HTTPException, Depends, status
+from pydantic import BaseModel, EmailStr
 from typing import Optional
-from fastapi import APIRouter, HTTPException, status, Depends
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
-import bcrypt
-from pydantic import BaseModel
+from datetime import datetime, timedelta
 from database import user_collection
+import bcrypt
+from jose import JWTError, jwt
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+import os
+from dotenv import load_dotenv
 
-# Configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "your-super-secret-key-for-ott-platform-user")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
+load_dotenv()
 
 router = APIRouter()
 
+# --- Config ---
+SECRET_KEY = os.getenv("SECRET_KEY", "your_super_secret_key_change_this") 
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
 # --- Models ---
-class UserCreate(BaseModel):
+class UserSignup(BaseModel):
     username: str
-    email: str
+    email: EmailStr
+    password: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
     password: str
 
 class Token(BaseModel):
     access_token: str
     token_type: str
-    username: str # Return username to client
+    username: str
 
-# --- Helpers ---
-def verify_password(plain_password, hashed_password):
-    # Passwords in DB might be stored as string or bytes, handle carefully
-    if isinstance(hashed_password, str):
-        hashed_password = hashed_password.encode('utf-8')
-    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password)
+class TokenData(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
 
-def get_password_hash(password):
+# --- Utils ---
+def verify_password(plain_password: str, hashed_password: str):
+    # Check password using bcrypt
+    # bcrypt.checkpw requires bytes, so encode both
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+def get_password_hash(password: str):
+    # Hash password using bcrypt
+    # bcrypt.gensalt() generates a salt
+    # hashpw requires bytes
     salt = bcrypt.gensalt()
-    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8') # Return as string for storage
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -47,40 +63,83 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-# --- Endpoints ---
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+        token_data = TokenData(email=email)
+    except JWTError:
+        raise credentials_exception
+    
+    if user_collection is None:
+         raise HTTPException(status_code=500, detail="Database not connected")
+
+    user = user_collection.find_one({"email": token_data.email})
+    if user is None:
+        raise credentials_exception
+    
+    user["_id"] = str(user["_id"])
+    return user
+
+# --- Routes ---
 
 @router.post("/signup", response_model=Token)
-async def signup(user: UserCreate):
+async def signup(user: UserSignup):
+    if user_collection is None:
+        raise HTTPException(status_code=500, detail="Database connection error")
+
+    # Check if user exists
     if user_collection.find_one({"email": user.email}):
         raise HTTPException(status_code=400, detail="Email already registered")
-    
+        
     if user_collection.find_one({"username": user.username}):
         raise HTTPException(status_code=400, detail="Username already taken")
     
-    hashed_password = get_password_hash(user.password)
-    user_data = {
+    # Hash password
+    try:
+        hashed_password = get_password_hash(user.password)
+    except Exception as e:
+        print(f"Error hashing password: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error processing password")
+
+    new_user = {
         "username": user.username,
         "email": user.email,
         "password": hashed_password,
-        "created_at": datetime.utcnow()
+        "created_at": datetime.utcnow(),
+        "role": "user"
     }
-    user_collection.insert_one(user_data)
     
-    # Auto-login: generate token
+    result = user_collection.insert_one(new_user)
+    
+    # Create Token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
+        data={"sub": user.email, "username": user.username}, expires_delta=access_token_expires
     )
-    return {
-        "access_token": access_token, 
-        "token_type": "bearer",
-        "username": user.username
-    }
+    
+    return {"access_token": access_token, "token_type": "bearer", "username": user.username}
 
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = user_collection.find_one({"email": form_data.username})
-    
+    # OAuth2PasswordRequestForm "username" field will contain the email
+    if user_collection is None:
+        raise HTTPException(status_code=500, detail="Database connection error")
+
+    # Allow login with either email or username
+    user = user_collection.find_one({
+        "$or": [
+            {"email": form_data.username},
+            {"username": form_data.username}
+        ]
+    })
     if not user or not verify_password(form_data.password, user["password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -90,10 +149,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user["email"]}, expires_delta=access_token_expires
+        data={"sub": user["email"], "username": user.get("username")}, expires_delta=access_token_expires
     )
-    return {
-        "access_token": access_token, 
-        "token_type": "bearer",
-        "username": user.get("username", user["email"])
-    }
+    
+    return {"access_token": access_token, "token_type": "bearer", "username": user.get("username")}

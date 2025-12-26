@@ -4,6 +4,7 @@ import Head from 'next/head';
 import AdminSidebar from '../../components/AdminSidebar';
 import AdminTopBar from '../../components/AdminTopBar';
 import FormInput from '../../components/FormInput';
+import { API_URL } from '../../config/api';
 
 export default function EditContent() {
     const router = useRouter();
@@ -25,7 +26,7 @@ export default function EditContent() {
     useEffect(() => {
         const token = localStorage.getItem('adminToken');
         if (!token) {
-            router.push('/admin/login');
+            router.push('/auth');
             return;
         }
 
@@ -33,7 +34,7 @@ export default function EditContent() {
 
         const fetchItem = async () => {
             try {
-                const response = await fetch('http://localhost:8000/admin/content', {
+                const response = await fetch(`${API_URL}/admin/content`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await response.json();
@@ -66,7 +67,7 @@ export default function EditContent() {
 
         const token = localStorage.getItem('adminToken');
         try {
-            const response = await fetch(`http://localhost:8000/admin/content/${id}`, {
+            const response = await fetch(`${API_URL}/admin/content/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

@@ -45,6 +45,8 @@ export default function Navbar() {
           <Link href="/" className="text-sm font-medium text-white hover:text-primary transition-colors">Home</Link>
           <Link href="/ai" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">AI Curated</Link>
           <Link href="/dashboard" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Trending</Link>
+          <Link href="/about" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">About</Link>
+          <Link href="/contact" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Contact</Link>
           {/* <Link href="#" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">My List</Link> */}
         </nav>
         <div className="flex items-center gap-6">

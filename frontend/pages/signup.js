@@ -1,14 +1,16 @@
-import Head from 'next/head';
-import Link from 'next/link';
 import { useState } from 'react';
-import Layout from '../components/Layout';
-import { API_URL } from '../config/api';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import Head from 'next/head';
 
 export default function Signup() {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const router = useRouter();
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -16,165 +18,128 @@ export default function Signup() {
         e.preventDefault();
         setError('');
 
-        if (password !== confirmPassword) {
-            setError('Passwords do not match');
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords don't match");
             return;
         }
 
         setLoading(true);
 
         try {
-            const response = await fetch(`${API_URL}/auth/signup`, {
+            const res = await fetch('http://127.0.0.1:8000/auth/signup', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: formData.username,
+                    email: formData.email,
+                    password: formData.password
+                }),
             });
 
-            // If we can't reach the server at all
-            if (!response) {
-                throw new Error('Cannot connect to server. Please make sure the backend is running.');
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.detail || 'Signup failed');
             }
 
-            const data = await response.json();
+            // Success
+            localStorage.setItem('userToken', data.access_token);
+            localStorage.setItem('username', data.username);
+            localStorage.setItem('userEmail', formData.email);
 
-            if (response.ok) {
-                // Auto-login
-                localStorage.setItem('userToken', data.access_token);
-                localStorage.setItem('userEmail', email);
-                localStorage.setItem('username', data.username);
-                window.location.href = '/';
-            } else {
-                // Show the server's error message
-                throw new Error(data.detail || `Signup failed (Error ${response.status})`);
-            }
+            router.push('/');
         } catch (err) {
-            // Handle both network errors and server errors
-            if (err.message === 'Failed to fetch') {
-                setError('Cannot connect to server. Please check if the backend is running on port 8000.');
-            } else {
-                setError(err.message);
-            }
+            setError(err.message);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Layout>
+        <div className="min-h-screen bg-black flex items-center justify-center p-4">
             <Head>
-                <title>Create Account | CINE NEST</title>
+                <title>Sign Up - CINE NEST</title>
             </Head>
 
-            <div className="signup-container">
-                <div className="signup-box">
-                    <h1>Create your account</h1>
-                    <p>Join CINE NEST - Your AI-powered entertainment destination.</p>
-                    <form onSubmit={handleSubmit}>
-                        {error && <div className="error-message">{error}</div>}
+            <div className="w-full max-w-md bg-zinc-900/50 p-8 rounded-2xl border border-white/10 backdrop-blur-md">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
+                    <p className="text-gray-400">Join CINE NEST today</p>
+                </div>
+
+                {error && (
+                    <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg mb-6 text-sm text-center">
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
                         <input
                             type="text"
-                            placeholder="Username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
                             required
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-600 transition-colors"
+                            placeholder="johndoe"
+                            value={formData.username}
+                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                         />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
                         <input
                             type="email"
-                            placeholder="Email address"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
                             required
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-600 transition-colors"
+                            placeholder="name@example.com"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            minLength="6"
-                        />
-                        <input
-                            type="password"
-                            placeholder="Confirm Password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                        />
-                        <button type="submit" className="signup-btn" disabled={loading}>
-                            {loading ? 'Setting up account...' : 'Create Account & Start Watching'}
-                        </button>
-                    </form>
-
-                    <div className="signup-footer">
-                        <p>Already have an account? <Link href="/login">Sign In.</Link></p>
                     </div>
-                </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input
+                            type="password"
+                            required
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-600 transition-colors"
+                            placeholder="••••••••"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                        <input
+                            type="password"
+                            required
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-600 transition-colors"
+                            placeholder="••••••••"
+                            value={formData.confirmPassword}
+                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg mt-4 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {loading ? 'Creating Account...' : 'Create Account'}
+                    </button>
+                </form>
+
+                <p className="mt-8 text-center text-gray-400 text-sm">
+                    Already have an account?{' '}
+                    <Link href="/auth" className="text-red-500 hover:text-red-400 font-medium whitespace-nowrap">
+                        Sign in
+                    </Link>
+                </p>
             </div>
-
-            <style jsx>{`
-        .signup-container {
-          min-height: 90vh;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://assets.nflxext.com/ffe/siteui/vlv3/f8ca36a4-acec-4adc-9511-2a1d0a2db771/67119a00-cb69-4a36-8208-f4c0177728b7/US-en-20220523-popsignuptwelve-perspective_alpha_website_medium.jpg');
-          background-size: cover;
-          background-position: center;
-          color: white;
-        }
-        .signup-box {
-          background: rgba(0, 0, 0, 0.85);
-          width: 100%;
-          max-width: 450px;
-          padding: 60px;
-          border-radius: 8px;
-          border: 1px solid rgba(255,255,255,0.1);
-        }
-        h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 12px; }
-        p { font-size: 1.1rem; margin-bottom: 30px; color: #ccc; }
-        .error-message {
-          background: #e87c03;
-          color: white;
-          padding: 12px 20px;
-          border-radius: 4px;
-          margin-bottom: 20px;
-          font-size: 0.9rem;
-        }
-        input {
-          width: 100%;
-          padding: 16px 20px;
-          background: #333;
-          border: 1px solid transparent;
-          border-radius: 4px;
-          color: white;
-          font-size: 1rem;
-          margin-bottom: 16px;
-          outline: none;
-          transition: 0.3s;
-        }
-        input:focus { background: #454545; border-color: #e50914; }
-        .signup-btn {
-          width: 100%;
-          padding: 16px;
-          background: #e50914;
-          color: white;
-          border: none;
-          font-size: 1.1rem;
-          font-weight: 700;
-          cursor: pointer;
-          border-radius: 4px;
-          margin-top: 10px;
-          transition: 0.3s;
-        }
-        .signup-btn:hover { background: #b20710; transform: translateY(-2px); }
-        .signup-footer { margin-top: 40px; font-size: 1rem; color: #737373; text-align: center; }
-        .signup-footer :global(a) { color: white; text-decoration: none; font-weight: bold; }
-        .signup-footer :global(a:hover) { text-decoration: underline; }
-
-        @media (max-width: 500px) {
-            .signup-box { padding: 40px 20px; margin: 20px; }
-        }
-      `}</style>
-        </Layout>
+        </div>
     );
 }

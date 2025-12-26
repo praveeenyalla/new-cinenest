@@ -10,6 +10,7 @@ export default function AdminSidebar() {
     { name: 'Comments', icon: '💬', path: '/admin/comments' },
     { name: 'Users', icon: '👥', path: '/admin/users' },
     { name: 'Movie List', icon: '🎬', path: '/admin/content' },
+    { name: 'User Analysis', icon: '📈', path: '/admin/analytics' },
     { name: 'Authentication', icon: '🔒', path: '/admin/authentication', hasSub: true },
   ];
 

@@ -1,191 +1,132 @@
-
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useState, useMemo } from 'react';
 import Head from 'next/head';
 import AdminSidebar from '../../components/AdminSidebar';
-import AdminTopBar from '../../components/AdminTopBar';
-import { FaStar, FaFilm, FaTv } from 'react-icons/fa';
 import { API_URL } from '../../config/api';
 
-export default function RatingsPage() {
-    const [data, setData] = useState({ top_rated: [], upcoming_2025: [] });
-    const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState({ year: 'all', platform: 'all' });
-    const router = useRouter();
+const MOCK_RATINGS = [
+    { id: 1, user: "Alex Mercer", avatar: "A", movie: "Inception", rating: 9.5, review: "Mind-bending masterpiece!", date: "2 mins ago" },
+    { id: 2, user: "Sarah Connor", avatar: "S", movie: "Terminator 2", rating: 10, review: "Best action movie ever.", date: "15 mins ago" },
+    { id: 3, user: "John Wick", avatar: "J", movie: "The Matrix", rating: 8.8, review: "Classic sci-fi.", date: "1 hour ago" },
+    { id: 4, user: "Ellen Ripley", avatar: "E", movie: "Alien", rating: 9.0, review: "Terrifyingly good.", date: "2 hours ago" },
+    { id: 5, user: "Marty McFly", avatar: "M", movie: "Back to the Future", rating: 9.8, review: "Great Scott!", date: "3 hours ago" },
+    { id: 6, user: "Tony Stark", avatar: "T", movie: "Iron Man", rating: 8.5, review: "Solid start to the MCU.", date: "5 hours ago" },
+    { id: 7, user: "Bruce Wayne", avatar: "B", movie: "The Dark Knight", rating: 9.9, review: "Why so serious? Because it's amazing.", date: "1 day ago" },
+    { id: 8, user: "Clark Kent", avatar: "C", movie: "Man of Steel", rating: 7.2, review: "A bit destructive.", date: "1 day ago" },
+    { id: 9, user: "Diana Prince", avatar: "D", movie: "Wonder Woman", rating: 8.0, review: "Empowering.", date: "2 days ago" },
+    { id: 10, user: "Peter Parker", avatar: "P", movie: "Spider-Man: No Way Home", rating: 9.2, review: "The nostalgia hit hard.", date: "2 days ago" },
+    { id: 11, user: "Wanda M.", avatar: "W", movie: "Doctor Strange 2", rating: 6.5, review: "Messy plot.", date: "3 days ago" },
+    { id: 12, user: "Steve Rogers", avatar: "S", movie: "Captain America: Winter Soldier", rating: 9.1, review: "Best MCU film.", date: "4 days ago" },
+];
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const token = localStorage.getItem('adminToken');
-            if (!token) {
-                router.push('/login');
-                return;
-            }
+export default function RatingManagement() {
+    const [filterStar, setFilterStar] = useState('all');
 
-            try {
-                const res = await fetch(`${API_URL}/admin/ratings`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (res.status === 401) {
-                    localStorage.removeItem('adminToken');
-                    router.push('/login');
-                    return;
-                }
-
-                if (res.ok) {
-                    const json = await res.json();
-                    setData(json);
-                }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, [router]);
-
-    // Frontend Filtering for immediate feedback (since backend filtering is on content-list)
-    const filteredRated = data.top_rated.filter(item => {
-        if (filter.year !== 'all' && item.year !== parseInt(filter.year)) return false;
-        if (filter.platform !== 'all' && item.platform !== filter.platform) return false;
-        return true;
-    });
+    const filteredRatings = useMemo(() => {
+        if (filterStar === 'all') return MOCK_RATINGS;
+        const min = parseInt(filterStar);
+        return MOCK_RATINGS.filter(r => r.rating >= min && r.rating < min + 2); // approximate range
+    }, [filterStar]);
 
     return (
-        <div className="admin-page">
-            <Head><title>Ratings | CINE NEST Admin</title></Head>
-            <AdminSidebar />
-            <div className="main-wrapper">
-                <AdminTopBar />
-                <main className="dashboard-body">
-                    <h1>Content Ratings & Feedback</h1>
+        <div className="min-h-screen bg-[#020202] text-white font-sans flex font-display selection:bg-primary selection:text-white">
+            <Head>
+                <title>User Ratings | CINE NEST Admin</title>
+            </Head>
 
-                    {/* Simulated 2025 Movies Section */}
-                    <section className="section">
-                        <h2>🚀 Upcoming Releases (2025)</h2>
-                        <div className="grid">
-                            {data.upcoming_2025.map((item, i) => (
-                                <div key={i} className="card upcoming">
-                                    <div className="badge">{item.platform}</div>
-                                    <div className="info">
-                                        <h3>{item.title}</h3>
-                                        <div className="meta">
-                                            <span>{item.year}</span>
-                                            <span>{item.genres}</span>
+            <AdminSidebar />
+
+            <div className="flex-1 ml-[260px] relative z-10">
+                <header className="h-20 bg-black/60 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-20">
+                    <div>
+                        <h1 className="text-xl font-bold tracking-tight">User Ratings</h1>
+                        <p className="text-xs text-gray-500">Monitor and manage community feedback</p>
+                    </div>
+                </header>
+
+                <main className="p-8">
+                    {/* Stats Row */}
+                    <div className="grid grid-cols-4 gap-4 mb-8">
+                        <StatCard label="Total Ratings" value="12,543" change="+12%" />
+                        <StatCard label="Avg Rating" value="8.4" change="+0.2" />
+                        <StatCard label="Reviews Today" value="142" change="+5%" />
+                        <StatCard label="Pending Moderation" value="5" color="text-yellow-500" />
+                    </div>
+
+                    <div className="glass-panel p-6 rounded-xl">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-lg font-semibold">Recent Ratings</h2>
+                            <select
+                                value={filterStar}
+                                onChange={(e) => setFilterStar(e.target.value)}
+                                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-red-600"
+                            >
+                                <option value="all">All Ratings</option>
+                                <option value="9">9★ - 10★ (Excellent)</option>
+                                <option value="7">7★ - 8★ (Good)</option>
+                                <option value="5">5★ - 6★ (Average)</option>
+                                <option value="0">Low Ratings</option>
+                            </select>
+                        </div>
+
+                        <div className="space-y-4">
+                            {filteredRatings.map(rating => (
+                                <div key={rating.id} className="p-4 bg-white/5 rounded-lg border border-white/5 hover:border-white/10 transition-colors flex gap-4 items-start">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center font-bold text-sm">
+                                        {rating.avatar}
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h4 className="font-bold text-sm text-white">{rating.user}</h4>
+                                                <div className="text-xs text-gray-500 mb-1">reviewed <span className="text-gray-300">{rating.movie}</span></div>
+                                            </div>
+                                            <span className="text-xs text-gray-600">{rating.date}</span>
                                         </div>
-                                        <div className="rating-box">
-                                            <FaStar color="#e50914" /> {item.imdb}
+
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="flex text-yellow-500 text-sm">
+                                                {"★".repeat(Math.round(rating.rating / 2))}
+                                                <span className="text-gray-700">{"★".repeat(5 - Math.round(rating.rating / 2))}</span>
+                                            </div>
+                                            <span className="text-xs font-bold bg-white/10 px-1.5 rounded">{rating.rating}</span>
+                                        </div>
+
+                                        <p className="text-sm text-gray-400 italic">"{rating.review}"</p>
+
+                                        <div className="mt-3 flex gap-4">
+                                            <button className="text-xs text-gray-500 hover:text-white">Reply</button>
+                                            <button className="text-xs text-gray-500 hover:text-white">Details</button>
+                                            <button className="text-xs text-red-500/50 hover:text-red-500 ml-auto">Delete</button>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    </section>
-
-                    {/* Top Rated Real Content */}
-                    <section className="section">
-                        <div className="flex-header">
-                            <h2>🏆 Top Rated Now</h2>
-                            <div className="filters">
-                                <select onChange={(e) => setFilter({ ...filter, platform: e.target.value })}>
-                                    <option value="all">All Platforms</option>
-                                    <option value="Netflix">Netflix</option>
-                                    <option value="Prime Video">Prime Video</option>
-                                    <option value="Hulu">Hulu</option>
-                                    <option value="Disney+">Disney+</option>
-                                </select>
-                                <select onChange={(e) => setFilter({ ...filter, year: e.target.value })}>
-                                    <option value="all">All Years</option>
-                                    <option value="2020">2020</option>
-                                    <option value="2010">2010</option>
-                                    <option value="2000">2000</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Poster</th>
-                                        <th>Title</th>
-                                        <th>Platform</th>
-                                        <th>Year</th>
-                                        <th>IMDb</th>
-                                        <th>Votes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredRated.map((item, i) => (
-                                        <tr key={i}>
-                                            <td>
-                                                <div className="poster-box">
-                                                    {item.thumbnail ? <img src={item.thumbnail} /> : <div className="placeholder-poster">{item.title[0]}</div>}
-                                                </div>
-                                            </td>
-                                            <td style={{ fontWeight: 'bold' }}>{item.title}</td>
-                                            <td><span className="platform-tag">{item.platform}</span></td>
-                                            <td>{item.year}</td>
-                                            <td>
-                                                <div style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', color: '#fbbf24' }}>
-                                                    <FaStar style={{ marginRight: 5 }} /> {item.imdb}
-                                                </div>
-                                            </td>
-                                            <td style={{ color: '#888' }}>{item.votes ? item.votes.toLocaleString() : 'N/A'}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
+                    </div>
                 </main>
             </div>
-            <style jsx>{`
-                .admin-page { background: #000; color: white; min-height: 100vh; }
-                .main-wrapper { margin-left: 260px; padding-top: 70px; }
-                .dashboard-body { padding: 2rem; }
-                h1 { margin-bottom: 2rem; }
-                .section { margin-bottom: 3rem; }
-                h2 { border-left: 4px solid #e50914; padding-left: 10px; margin: 0; }
-                
-                .flex-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-                .filters select {
-                    background: #111; color: white; padding: 8px 12px; border: 1px solid #333;
-                    border-radius: 6px; margin-left: 10px; cursor: pointer;
-                }
 
-                .grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                    gap: 1.5rem;
-                }
-                .card {
-                    background: #111; border: 1px solid #222; border-radius: 8px; padding: 1.5rem;
-                    position: relative; transition: 0.3s;
-                }
-                .card:hover { transform: translateY(-5px); border-color: #e50914; }
-                .badge {
-                    position: absolute; top: 10px; right: 10px; background: #e50914;
-                    font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold;
-                }
-                h3 { margin: 10px 0; font-size: 1rem; }
-                .meta { font-size: 0.8rem; color: #888; display: flex; gap: 10px; margin-bottom: 10px; }
-                .rating-box { font-size: 1.2rem; font-weight: bold; }
-                
-                table { width: 100%; border-collapse: collapse; background: #111; border-radius: 8px; overflow: hidden; }
-                th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #222; }
-                th { background: #1a1a1a; color: #888; font-size: 0.8rem; text-transform: uppercase; }
-                
-                .poster-box { width: 40px; height: 60px; background: #222; border-radius: 4px; overflow: hidden; }
-                .poster-box img { width: 100%; height: 100%; object-fit: cover; }
-                .placeholder-poster { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #555; font-weight: bold; }
-                
-                .platform-tag {
-                    font-size: 0.75rem; padding: 4px 8px; border: 1px solid #333;
-                    border-radius: 4px; background: #1a1a1a;
+            <style jsx>{`
+                .glass-panel {
+                    background: rgba(10, 10, 10, 0.6);
+                    backdrop-filter: blur(12px);
+                    border: 1px solid rgba(255, 255, 255, 0.06);
                 }
             `}</style>
         </div>
     );
 }
+
+const StatCard = ({ label, value, change, color }) => (
+    <div className="bg-[#111] border border-white/5 p-4 rounded-xl">
+        <div className="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">{label}</div>
+        <div className="flex items-end justify-between">
+            <div className={`text-2xl font-bold ${color || 'text-white'}`}>{value}</div>
+            {change && (
+                <div className={`text-xs font-mono ${change.includes('+') ? 'text-green-500' : 'text-red-500'}`}>
+                    {change}
+                </div>
+            )}
+        </div>
+    </div>
+);

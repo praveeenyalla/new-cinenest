@@ -11,29 +11,64 @@ class Recommender:
         self.load_data()
 
     def load_data(self):
-        """Load movie dataset from JSON and build similarity matrix"""
+        """Load movie dataset from multiple JSON sources and build similarity matrix"""
         try:
             import os
             import json
             
-            # Resolve path to the JSON dataset
-            JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "final_df_cleaned.json")
+            # Resolve paths
+            BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            FINAL_DF_PATH = os.path.join(BASE_DIR, "final_df_cleaned.json")
+            NEW_DATA_PATH = os.path.join(BASE_DIR, "new_data.json")
             
-            if not os.path.exists(JSON_PATH):
-                print(f"Warning: Dataset file not found at {JSON_PATH}")
+            # 1. Load Main Dataset
+            if not os.path.exists(FINAL_DF_PATH):
+                print(f"Warning: Dataset file not found at {FINAL_DF_PATH}")
                 self.df = pd.DataFrame()
                 return
 
-            with open(JSON_PATH, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+            with open(FINAL_DF_PATH, 'r', encoding='utf-8') as f:
+                data_main = json.load(f)
             
-            if not data:
-                print("Warning: Dataset is empty. Recommendation engine failed to load.")
-                self.df = pd.DataFrame()
+            df_main = pd.DataFrame(data_main)
+
+            # 2. Load New Data (2021-2025)
+            df_new = pd.DataFrame()
+            if os.path.exists(NEW_DATA_PATH):
+                with open(NEW_DATA_PATH, 'r', encoding='utf-8') as f:
+                    data_new = json.load(f)
+                
+                # Normalize new data structure to match main df
+                normalized_new = []
+                for item in data_new:
+                    entry = {
+                        "Title": item.get("title"),
+                        "Year": item.get("year"),
+                        "Type": item.get("type", "Movie").lower(),
+                        "IMDb": item.get("imdb_rating", 0),
+                        "Genres": "Drama", # Default genre if missing
+                        "Directors": "Unknown",
+                        "Country": "Unknown",
+                        "Language": "English",
+                        "Runtime": 0,
+                        "Netflix": 1 if item.get("platform") == "Netflix" else 0,
+                        "Hulu": 1 if item.get("platform") == "Hulu" else 0,
+                        "Prime Video": 1 if item.get("platform") == "Prime Video" else 0,
+                        "Disney+": 1 if item.get("platform") == "Disney+" else 0,
+                        "Rotten Tomatoes": None
+                    }
+                    normalized_new.append(entry)
+                
+                df_new = pd.DataFrame(normalized_new)
+                print(f"Loaded {len(df_new)} new items from new_data.json")
+
+            # 3. Merge Datasets
+            self.df = pd.concat([df_main, df_new], ignore_index=True)
+            
+            if self.df.empty:
+                print("Warning: Combined dataset is empty.")
                 return
 
-            self.df = pd.DataFrame(data)
-            
             # Preprocessing fields into vectors
             # 1. Genre similarity (40%) - Multi-hot encoding
             self.df['Genres'] = self.df['Genres'].fillna('')
@@ -69,7 +104,7 @@ class Recommender:
             
             # Generate similarity matrix
             self.similarity_matrix = cosine_similarity(combined_features)
-            print(f"Successfully loaded recommendation engine with {len(self.df)} items from JSON.")
+            print(f"Successfully loaded recommendation engine with {len(self.df)} total items.")
             
         except Exception as e:
             print(f"Error initializing recommender: {str(e)}")
@@ -119,8 +154,52 @@ class Recommender:
             
         return recommendations
 
+    def get_curated_content(self):
+        """Returns categorized curated content from the dataset"""
+        if self.df is None or self.df.empty:
+            return {}
+
+        # 1. Trending Now (New Releases 2024-2025 with High Rating)
+        trending = self.df[
+            (self.df['Year'] >= 2024) & 
+            (self.df['IMDb'] >= 7.5)
+        ].sort_values(by='IMDb', ascending=False).head(10)
+
+        # 2. All-Time Top Rated (IMDb > 8.5)
+        top_rated = self.df[self.df['IMDb'] >= 8.5].sort_values(by='IMDb', ascending=False).head(10)
+
+        # 3. Netflix Exclusives (New & High Rated)
+        netflix = self.df[
+            (self.df['Netflix'] == 1) & 
+            (self.df['Year'] >= 2022) &
+            (self.df['IMDb'] >= 7.0)
+        ].sort_values(by='Year', ascending=False).head(10)
+
+        def format_list(df_subset):
+            results = []
+            for _, row in df_subset.iterrows():
+                available_platforms = [p for p in ['Netflix', 'Hulu', 'Prime Video', 'Disney+'] if row.get(p) == 1]
+                results.append({
+                    "title": row.get('Title'),
+                    "year": int(row.get('Year', 0)),
+                    "imdb": float(row.get('IMDb', 0)),
+                    "platforms": available_platforms,
+                    "genres": str(row.get('Genres', '')).split(','),
+                    "directors": str(row.get('Directors', ''))
+                })
+            return results
+
+        return {
+            "trending_now": format_list(trending),
+            "top_rated": format_list(top_rated),
+            "netflix_new": format_list(netflix)
+        }
+
 # Initialize once into memory (Singleton pattern as requested)
 engine = Recommender()
 
 def get_recommendations(title: str, limit: int = 10):
     return engine.get_recommendations(title, limit)
+
+def get_ai_curated():
+    return engine.get_curated_content()

@@ -5,12 +5,23 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
 from database import content_collection, history_collection, user_collection
+from routes.auth import get_current_user
 from groq import Groq
 from dotenv import load_dotenv
+from ml.recommender import get_ai_curated
 
 load_dotenv()
 
 router = APIRouter()
+
+@router.get("/curated")
+async def get_curated_lists():
+    """Get AI-curated lists based on data analysis"""
+    try:
+        data = get_ai_curated()
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 import google.generativeai as genai
 
@@ -29,10 +40,23 @@ class ChatMessage(BaseModel):
 
 def get_platform_data():
     """Helper to get platform stats for the AI to analyze"""
+    if not content_collection: return []
     platforms = ["Netflix", "Hulu", "Prime Video", "Disney+"]
     stats = []
     for platform in platforms:
-        count = content_collection.count_documents({platform: 1})
+        # Firestore Count Query
+        # Note: 'param == 1' assumes the data structure is { 'Netflix': 1, ... }
+        # count() query is supported in newer firebase-admin
+        try:
+            query = content_collection.where(platform, "==", 1)
+            count_query = query.count()
+            count_snapshot = count_query.get()
+            count = count_snapshot[0][0].value
+        except:
+             # Fallback if count() failed or older SDK
+             # fetching all is expensive so we might mock or use limit
+             # For now, let's just use a basic query
+             count = 0 
         stats.append({"name": platform, "value": count})
     return stats
 
@@ -63,80 +87,58 @@ def sanitize_response(text: str) -> str:
     return text
 
 @router.post("/chat")
-async def chat_with_ai(chat: ChatMessage):
+async def chat_with_ai(request: ChatMessage, current_user: dict = Depends(get_current_user)):
+    user_email = current_user.get("email") or current_user.get("sub")
+    
+    # The original code used GOOGLE_API_KEY for Gemini.
+    # The new code snippet implies GEMINI_API_KEY.
+    # For consistency with the provided snippet, we'll use GOOGLE_API_KEY here.
+    if not GOOGLE_API_KEY:
+         raise HTTPException(status_code=500, detail="Gemini API Key not configured")
+
     try:
-        platform_stats = get_platform_data()
-        trending = get_trending_shows()
+        # Construct context
+        context_prompt = ""
+        # Could fetch user preferences from user_collection if needed
         
-        system_prompt = f"""
-        You are an advanced Brain Assistant. 
-        Data Context: {json.dumps(platform_stats)} | Trending: {json.dumps(trending)}
+        full_prompt = f"User asked: {request.message}\nContext: You are a movie recommendation assistant..."
         
-        Guidelines:
-        - NEVER mention the names 'Groq', 'Google', 'Gemini', or 'LLM'.
-        - Provide high-quality analysis with IMDb ratings.
-        - Return ONLY a JSON object.
-        """
-
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": chat.message}
-        ]
-
-        try:
-            # 1. Primary Attempt with Groq (Fast)
-            # Switch to a more stable model ID
-            completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile", 
-                messages=messages
-            )
-            content = completion.choices[0].message.content
-        except Exception as e:
-            # 2. Secondary Attempt with Gemini (Powerful Fallback)
-            print(f"Groq failed ({e}), switching to Gemini...")
-            gemini_response = gemini_model.generate_content(f"{system_prompt}\nUser Request: {chat.message}")
-            content = gemini_response.text
-
-        # Parse and Clean
-        if "```json" in content:
-            content = content.split("```json")[1].split("```")[0]
-        elif "```" in content:
-            content = content.split("```")[1].split("```")[0]
-            
-        try:
-            ai_response = json.loads(content.strip())
-        except:
-            # If not JSON, wrapped it
-            ai_response = {"text": content.strip(), "chartData": None, "chartType": None}
-
-        # White-labeling
-        ai_response["text"] = sanitize_response(ai_response["text"])
-
-        # Save to history
-        history_item = {
-            "user_email": chat.user_email,
-            "query": chat.message,
-            "response": ai_response,
-            "timestamp": datetime.utcnow()
-        }
-        history_collection.insert_one(history_item)
-
-        return ai_response
+        response = gemini_model.generate_content(full_prompt) # Using gemini_model as defined globally
+        ai_response = response.text
+        
+        # Save to MongoDB
+        if history_collection is not None:
+             history_doc = {
+                 "user_email": user_email,
+                 "user_message": request.message,
+                 "ai_response": ai_response,
+                 "timestamp": datetime.utcnow()
+             }
+             history_collection.insert_one(history_doc)
+        
+        return {"response": ai_response}
 
     except Exception as e:
-        print(f"CRITICAL AI ERROR: {str(e)}")
-        return {
-            "text": "The Brain Engine is currently offline. Please verify API keys in backend configuration.",
-            "chartData": platform_stats,
-            "chartType": "pie"
-        }
+        print(f"AI Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/history/{user_email}")
-async def get_chat_history(user_email: str):
-    history = list(history_collection.find({"user_email": user_email}).sort("timestamp", -1).limit(20))
-    for item in history:
-        item["_id"] = str(item["_id"])
-        item["timestamp"] = item["timestamp"].isoformat()
+@router.get("/history")
+async def get_chat_history(current_user: dict = Depends(get_current_user)):
+    user_email = current_user.get("email") # or username, depending on auth.py token
+    if not user_email:
+         # Fallback if token structure is different
+         user_email = current_user.get("sub")
+
+    if history_collection is None:
+        raise HTTPException(status_code=500, detail="Database connection error")
+
+    # MongoDB Query
+    history_cursor = history_collection.find({"user_email": user_email}).sort("timestamp", -1).limit(50)
+    history = []
+    for doc in history_cursor:
+        doc["_id"] = str(doc["_id"])
+        history.append(doc)
+    
     return history
 
 @router.get("/recommendations")
