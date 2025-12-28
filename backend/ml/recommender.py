@@ -159,34 +159,45 @@ class Recommender:
         if self.df is None or self.df.empty:
             return {}
 
-        # 1. Trending Now (New Releases 2024-2025 with High Rating)
-        trending = self.df[
-            (self.df['Year'] >= 2024) & 
-            (self.df['IMDb'] >= 7.5)
-        ].sort_values(by='IMDb', ascending=False).head(10)
+        try:
+            # 1. Trending Now (New Releases 2024-2025 with High Rating)
+            trending = self.df[
+                (self.df['Year'] >= 2024) & 
+                (self.df['IMDb'] >= 7.5)
+            ].sort_values(by='IMDb', ascending=False).head(10)
 
-        # 2. All-Time Top Rated (IMDb > 8.5)
-        top_rated = self.df[self.df['IMDb'] >= 8.5].sort_values(by='IMDb', ascending=False).head(10)
+            # 2. All-Time Top Rated (IMDb > 8.5)
+            top_rated = self.df[self.df['IMDb'] >= 8.5].sort_values(by='IMDb', ascending=False).head(10)
 
-        # 3. Netflix Exclusives (New & High Rated)
-        netflix = self.df[
-            (self.df['Netflix'] == 1) & 
-            (self.df['Year'] >= 2022) &
-            (self.df['IMDb'] >= 7.0)
-        ].sort_values(by='Year', ascending=False).head(10)
+            # 3. Netflix Exclusives (New & High Rated)
+            netflix = self.df[
+                (self.df['Netflix'] == 1) & 
+                (self.df['Year'] >= 2022) &
+                (self.df['IMDb'] >= 7.0)
+            ].sort_values(by='Year', ascending=False).head(10)
+        except Exception as e:
+            print(f"Error filtering curated content: {e}")
+            return {}
 
         def format_list(df_subset):
             results = []
+            if df_subset is None or df_subset.empty:
+                return results
+
             for _, row in df_subset.iterrows():
-                available_platforms = [p for p in ['Netflix', 'Hulu', 'Prime Video', 'Disney+'] if row.get(p) == 1]
-                results.append({
-                    "title": row.get('Title'),
-                    "year": int(row.get('Year', 0)),
-                    "imdb": float(row.get('IMDb', 0)),
-                    "platforms": available_platforms,
-                    "genres": str(row.get('Genres', '')).split(','),
-                    "directors": str(row.get('Directors', ''))
-                })
+                try:
+                    available_platforms = [p for p in ['Netflix', 'Hulu', 'Prime Video', 'Disney+'] if row.get(p) == 1]
+                    results.append({
+                        "title": row.get('Title'),
+                        "year": int(row.get('Year', 0)),
+                        "imdb": float(row.get('IMDb', 0)),
+                        "platforms": available_platforms,
+                        "genres": str(row.get('Genres', '')).split(','),
+                        "directors": str(row.get('Directors', ''))
+                    })
+                except Exception as row_err:
+                     print(f"Skipping malformed row in curated: {row_err}")
+                     continue
             return results
 
         return {

@@ -41,36 +41,38 @@ export default function Navbar() {
             <h1 className="text-xl font-bold tracking-widest uppercase text-white">CINE NEST</h1>
           </div>
         </Link>
-        <nav className="hidden md:flex items-center gap-8">
-          <Link href="/" className="text-sm font-medium text-white hover:text-primary transition-colors">Home</Link>
-          <Link href="/ai" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">AI Curated</Link>
-          <Link href="/dashboard" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Trending</Link>
-          <Link href="/about" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">About</Link>
-          <Link href="/contact" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Contact</Link>
-          {/* <Link href="#" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">My List</Link> */}
-        </nav>
-        <div className="flex items-center gap-6">
-          <button className="text-white hover:text-primary transition-colors">
-            <span className="material-symbols-outlined">search</span>
-          </button>
-          <div className="flex items-center gap-3">
-            {!isLoggedIn ? (
-              <Link href="/auth">
-                <button className="hidden sm:block bg-primary/10 border border-primary/50 hover:bg-primary hover:border-primary text-primary hover:text-white px-5 py-2 rounded-lg text-sm font-bold tracking-wide transition-all duration-300">
-                  Sign In
-                </button>
-              </Link>
-            ) : (
-              <div className="flex items-center gap-3">
-                <span className="hidden sm:block text-sm font-bold text-gray-300">Hi, {username}</span>
-                <div
-                  className="size-10 rounded-full bg-surface-highlight border border-white/10 overflow-hidden bg-center bg-cover cursor-pointer hover:border-primary transition-all"
-                  style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDIJhsYNmNCTBCo3NNv9a8bn6tKxMP2V029SbUT-D01fwxh4LWyPsmZuVPw-nYI-D3W9ALBVHDOGq4-vX9Dl57aww4GGx7juhMm84yxeAyO9S34o9mEmcKCGPZ5QRKaXkA27y4lmda-uT4xoNSlMDXAthcM6WiS8zH2tXKmaQtwz8EMsz4gAKjdoffDXRuxeXa6mYtaMqmuMAssQDkQJbh-AMSJ6zlb6F3tb37GTMtDxFPMVHBKbJr6uzPgnVv14t3wM8qnUxAwHP8')" }}
-                  onClick={handleLogout}
-                  title="Click to Logout"
-                ></div>
-              </div>
-            )}
+        <div className="flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-8">
+            <Link href="/" className="text-sm font-medium text-white hover:text-primary transition-colors">Home</Link>
+            <Link href="/ai" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">AI Curated</Link>
+            <Link href="/dashboard" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Trending</Link>
+            <Link href="/about" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">About</Link>
+            <Link href="/contact" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Contact</Link>
+            {/* <Link href="#" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">My List</Link> */}
+          </nav>
+          <div className="flex items-center gap-6">
+            <button className="text-white hover:text-primary transition-colors">
+              <span className="material-symbols-outlined">search</span>
+            </button>
+            <div className="flex items-center gap-3">
+              {!isLoggedIn ? (
+                <Link href="/auth">
+                  <button className="hidden sm:block bg-primary/10 border border-primary/50 hover:bg-primary hover:border-primary text-primary hover:text-white px-5 py-2 rounded-lg text-sm font-bold tracking-wide transition-all duration-300">
+                    Sign In
+                  </button>
+                </Link>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <span className="hidden sm:block text-sm font-bold text-gray-300">Hi, {username}</span>
+                  <div
+                    className="size-10 rounded-full bg-surface-highlight border border-white/10 overflow-hidden bg-center bg-cover cursor-pointer hover:border-primary transition-all"
+                    style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDIJhsYNmNCTBCo3NNv9a8bn6tKxMP2V029SbUT-D01fwxh4LWyPsmZuVPw-nYI-D3W9ALBVHDOGq4-vX9Dl57aww4GGx7juhMm84yxeAyO9S34o9mEmcKCGPZ5QRKaXkA27y4lmda-uT4xoNSlMDXAthcM6WiS8zH2tXKmaQtwz8EMsz4gAKjdoffDXRuxeXa6mYtaMqmuMAssQDkQJbh-AMSJ6zlb6F3tb37GTMtDxFPMVHBKbJr6uzPgnVv14t3wM8qnUxAwHP8')" }}
+                    onClick={handleLogout}
+                    title="Click to Logout"
+                  ></div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

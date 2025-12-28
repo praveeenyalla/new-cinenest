@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -21,6 +21,12 @@ export default function AuthPage() {
         setError('');
         // Optional: clear form data
     };
+
+    useEffect(() => {
+        if (router.query.mode === 'login') {
+            setIsLogin(true);
+        }
+    }, [router.query.mode]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

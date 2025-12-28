@@ -300,7 +300,7 @@ const UserAnalytics = () => {
                         <span className="w-2 h-8 bg-primary rounded-full"></span>
                         User Analysis
                     </h2>
-                    <p className="text-sm text-gray-500 mt-2 ml-4">Deep dive into content performance metrics based on <code className="bg-white/5 px-1 py-0.5 rounded text-gray-300">final_df_cleaned.json</code></p>
+
                 </div>
                 <div className="text-right hidden sm:block">
                     <div className="text-2xl font-bold font-mono text-primary">{filteredData.length.toLocaleString()}</div>
@@ -456,7 +456,7 @@ const UserAnalytics = () => {
                                 />
                                 <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={32}>
                                     {platformChartData.map((entry, index) => (
-                                        <Cell key={`cell-\${index}`} fill={entry.fill} />
+                                        <Cell key={index} fill={entry.fill} />
                                     ))}
                                 </Bar>
                             </BarChart>
@@ -516,7 +516,7 @@ const UserAnalytics = () => {
                                     stroke="none"
                                 >
                                     {typeChartData.map((entry, index) => (
-                                        <Cell key={`cell-\${index}`} fill={entry.fill} />
+                                        <Cell key={index} fill={entry.fill} />
                                     ))}
                                 </Pie>
                                 <Tooltip
