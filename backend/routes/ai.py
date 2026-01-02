@@ -4,11 +4,11 @@ from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
-from database import content_collection, history_collection, user_collection
+import database
 from routes.auth import get_current_user
 from groq import Groq
 from dotenv import load_dotenv
-from ml.recommender import get_ai_curated
+from ml.recommender import get_ai_curated, search_movies_with_ai
 
 load_dotenv()
 
@@ -40,22 +40,14 @@ class ChatMessage(BaseModel):
 
 def get_platform_data():
     """Helper to get platform stats for the AI to analyze"""
-    if not content_collection: return []
+    if database.content_collection is None: return []
     platforms = ["Netflix", "Hulu", "Prime Video", "Disney+"]
     stats = []
     for platform in platforms:
-        # Firestore Count Query
-        # Note: 'param == 1' assumes the data structure is { 'Netflix': 1, ... }
-        # count() query is supported in newer firebase-admin
         try:
-            query = content_collection.where(platform, "==", 1)
-            count_query = query.count()
-            count_snapshot = count_query.get()
-            count = count_snapshot[0][0].value
+            # MongoDB count_documents
+            count = database.content_collection.count_documents({platform: 1})
         except:
-             # Fallback if count() failed or older SDK
-             # fetching all is expensive so we might mock or use limit
-             # For now, let's just use a basic query
              count = 0 
         stats.append({"name": platform, "value": count})
     return stats
@@ -107,14 +99,14 @@ async def chat_with_ai(request: ChatMessage, current_user: dict = Depends(get_cu
         ai_response = response.text
         
         # Save to MongoDB
-        if history_collection is not None:
+        if database.history_collection is not None:
              history_doc = {
                  "user_email": user_email,
                  "user_message": request.message,
                  "ai_response": ai_response,
                  "timestamp": datetime.utcnow()
              }
-             history_collection.insert_one(history_doc)
+             database.history_collection.insert_one(history_doc)
         
         return {"response": ai_response}
 
@@ -129,11 +121,11 @@ async def get_chat_history(current_user: dict = Depends(get_current_user)):
          # Fallback if token structure is different
          user_email = current_user.get("sub")
 
-    if history_collection is None:
+    if database.history_collection is None:
         raise HTTPException(status_code=500, detail="Database connection error")
 
     # MongoDB Query
-    history_cursor = history_collection.find({"user_email": user_email}).sort("timestamp", -1).limit(50)
+    history_cursor = database.history_collection.find({"user_email": user_email}).sort("timestamp", -1).limit(50)
     history = []
     for doc in history_cursor:
         doc["_id"] = str(doc["_id"])
@@ -153,4 +145,40 @@ async def get_special_recommendations(category: str = Query(...)):
         )
         return json.loads(completion.choices[0].message.content)
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/search")
+async def ai_movie_search(q: str = Query(...)):
+    """AI-powered movie search with natural language intent extraction"""
+    try:
+        # 1. Use Gemini to extract intent if query is complex
+        intent = None
+        if len(q.split()) > 2: # Only use Gemini for longer queries to save tokens/time
+            prompt = f"""
+            Analyze this movie search query: "{q}"
+            Extract filters as a JSON object with these keys:
+            - year: integer or null
+            - platform: string (Netflix, Hulu, Prime Video, Disney+) or null
+            - genre: string or null
+            - keyword: string or null
+            - sort_by: "rating" or "year"
+            - limit: integer (default 10)
+            
+            Return ONLY the JSON object.
+            """
+            try:
+                response = gemini_model.generate_content(prompt)
+                # Extract JSON from potential markdown code blocks
+                clean_text = response.text.replace("```json", "").replace("```", "").strip()
+                intent = json.loads(clean_text)
+            except Exception as ai_err:
+                print(f"Gemini Intent Extraction Failed: {ai_err}")
+                intent = None # Fallback to regex in recommender
+        
+        # 2. Call recommender logic
+        results = search_movies_with_ai(q, intent)
+        return {"query": q, "intent": intent, "results": results}
+        
+    except Exception as e:
+        print(f"Search Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))

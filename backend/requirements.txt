@@ -11,3 +11,5 @@ passlib[bcrypt]
 bcrypt==4.0.1
 groq
 google-generativeai
+scikit-learn
+google-search-results

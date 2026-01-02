@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from ml.recommender import get_recommendations
-from database import content_collection
+import database
 
 router = APIRouter()
 

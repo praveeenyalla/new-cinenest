@@ -3,6 +3,11 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Footer from '../components/Footer';
+import TrailersGrid, { TRAILERS_DATA } from '../components/TrailersGrid';
+import TrailerCard from '../components/TrailerCard';
+import TrailerModal from '../components/TrailerModal';
+import { motion, AnimatePresence } from 'framer-motion';
+
 import { API_URL } from '../config/api';
 
 export default function Home() {
@@ -12,6 +17,30 @@ export default function Home() {
   const [curatedData, setCuratedData] = useState({ trending_now: [], top_rated: [], netflix_new: [] });
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [activeGlobalTrailer, setActiveGlobalTrailer] = useState(null);
+
+  const handlePlay = (id, movie, embedUrl, withAudio = true) => {
+    let finalEmbed = embedUrl;
+    if (!finalEmbed) {
+      const originalUrl = movie.trailerUrl || movie.trailer || "";
+      finalEmbed = originalUrl.includes('watch?v=')
+        ? originalUrl.replace('watch?v=', 'embed/')
+        : originalUrl;
+    }
+
+    // Ensure embed format for final URL
+    if (!finalEmbed.includes('embed/')) {
+      finalEmbed = finalEmbed.replace('watch?v=', 'embed/');
+    }
+
+    setActiveGlobalTrailer({
+      id,
+      ...movie,
+      trailerUrl: finalEmbed,
+      withAudio
+    });
+  };
+
 
   useEffect(() => {
     const token = localStorage.getItem('userToken') || localStorage.getItem('adminToken');
@@ -174,13 +203,13 @@ export default function Home() {
                 <div className="text-primary group-hover:text-primary-dark transition-colors">
                   <span className="material-symbols-outlined text-3xl">smart_display</span>
                 </div>
-                <h2 className="text-white text-xl font-bold tracking-tight">CINE NEST</h2>
+                <h2 className="text-white text-2xl font-black tracking-tight drop-shadow-lg">CINE NEST</h2>
               </div>
             </Link>
             <nav className="hidden md:flex items-center gap-8">
               <Link href="/" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">Home</Link>
               <Link href="/ai" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">AI Curated</Link>
-              <Link href="/dashboard" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">Trending</Link>
+              <Link href="/dashboard" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">Analytics</Link>
               <Link href="/about" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">About</Link>
               <Link href="/contact" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">Contact</Link>
 
@@ -281,6 +310,8 @@ export default function Home() {
         </section>
 
         {/* Unified Library Showcase (New Section) */}
+
+
         <section className="py-24 bg-[#1f0e0f] border-b border-white/5 overflow-hidden" id="content-showcase">
           <div className="max-w-[1400px] mx-auto px-4 md:px-10 lg:px-20">
             <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
@@ -290,7 +321,7 @@ export default function Home() {
                   All Your Platforms. <br />One Intelligent Stream.
                 </h3>
                 <p className="text-gray-300 text-lg">
-                  CINE NEST aggregates the best content from every major streaming service. No more app-switching.
+                  CINE NEST aggregates the best content from every major streaming service. Hover to play trailers (3.5s delay).
                 </p>
               </div>
               <div className="flex gap-2">
@@ -300,115 +331,12 @@ export default function Home() {
                 <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-white">Disney+</span>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="poster-column space-y-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="h-6 w-1 bg-[#E50914] rounded-full"></div>
-                  <span className="text-white font-bold text-lg">Trending on Netflix</span>
-                </div>
-                <div className="poster-card group relative aspect-[2/3] overflow-hidden rounded-xl cursor-pointer">
-                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrfLqWDO3ftXtuUdiRUoEV1yIn-StEcFku3r1YEZ-hMQYH9feL_q_PKsh9amKUPRSx0AhZ1A&s=10')" }}></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
-                  <div className="absolute bottom-0 left-0 p-6 w-full">
-                    <span className="inline-block px-2 py-1 bg-[#E50914] text-white text-[10px] font-bold rounded mb-2">NETFLIX</span>
-                    <h4 className="text-white font-bold text-2xl mb-1 leading-tight">Stranger Things</h4>
-                    <div className="flex items-center text-xs text-gray-300 gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-300">
-                      <span className="material-symbols-outlined text-sm">visibility</span> Watch Now
-                    </div>
-                  </div>
-                </div>
-                <div className="poster-card group relative aspect-video overflow-hidden rounded-xl cursor-pointer">
-                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://images.justwatch.com/poster/249335581/s332/season-3')" }}></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 p-4 w-full">
-                    <span className="inline-block px-2 py-1 bg-[#E50914] text-white text-[10px] font-bold rounded mb-2">NETFLIX</span>
-                    <h4 className="text-white font-bold text-lg">Money Heist</h4>
-                    <p className="text-xs text-gray-400 mt-1">Crime • Thriller</p>
-                  </div>
-                </div>
-              </div>
 
-              <div className="poster-column space-y-6 lg:mt-12">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="h-6 w-1 bg-[#00A8E1] rounded-full"></div>
-                  <span className="text-white font-bold text-lg">Top on Prime</span>
-                </div>
-                <div className="poster-card group relative aspect-[2/3] overflow-hidden rounded-xl cursor-pointer">
-                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://m.media-amazon.com/images/S/pv-target-images/00a4a221f0846799ae0982f0607488e9e7a7ebc0537ece4e1edd9c0b515966fd.jpg')" }}></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
-                  <div className="absolute bottom-0 left-0 p-6 w-full">
-                    <span className="inline-block px-2 py-1 bg-[#00A8E1] text-white text-[10px] font-bold rounded mb-2">PRIME VIDEO</span>
-                    <h4 className="text-white font-bold text-2xl mb-1 leading-tight">John Wick: Chapter 4</h4>
-                    <div className="flex items-center text-xs text-gray-300 gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-300">
-                      <span className="material-symbols-outlined text-sm">visibility</span> Watch Now
-                    </div>
-                  </div>
-                </div>
-                <div className="poster-card group relative aspect-video overflow-hidden rounded-xl cursor-pointer">
-                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://m.media-amazon.com/images/S/pv-target-images/473fd8bc878799c1a035cb13c688edd9eb6d240d426abf34e0bf3c1dde95724b.jpg')" }}></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 p-4 w-full">
-                    <span className="inline-block px-2 py-1 bg-[#00A8E1] text-white text-[10px] font-bold rounded mb-2">PRIME VIDEO</span>
-                    <h4 className="text-white font-bold text-lg">The Boys</h4>
-                    <p className="text-xs text-gray-400 mt-1">Action • Satire</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="poster-column space-y-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="h-6 w-1 bg-[#113CCF] rounded-full"></div>
-                  <span className="text-white font-bold text-lg">Disney+ Heroes</span>
-                </div>
-                <div className="poster-card group relative aspect-[2/3] overflow-hidden rounded-xl cursor-pointer">
-                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRXef9DJnZiq5az0UnjkmvkQufOQ5MFnF7HATYRUXN913swRuH1')" }}></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
-                  <div className="absolute bottom-0 left-0 p-6 w-full">
-                    <span className="inline-block px-2 py-1 bg-[#113CCF] text-white text-[10px] font-bold rounded mb-2">DISNEY+</span>
-                    <h4 className="text-white font-bold text-2xl mb-1 leading-tight">Avengers: Endgame</h4>
-                    <div className="flex items-center text-xs text-gray-300 gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-300">
-                      <span className="material-symbols-outlined text-sm">visibility</span> Watch Now
-                    </div>
-                  </div>
-                </div>
-                <div className="poster-card group relative aspect-video overflow-hidden rounded-xl cursor-pointer">
-                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/ea78b4f8-f180-41e5-9aac-9e99c96fb4ac/compose?aspectRatio=1.78&format=webp&width=1200')" }}></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 p-4 w-full">
-                    <span className="inline-block px-2 py-1 bg-[#113CCF] text-white text-[10px] font-bold rounded mb-2">DISNEY+</span>
-                    <h4 className="text-white font-bold text-lg">The Mandalorian</h4>
-                    <p className="text-xs text-gray-400 mt-1">Sci-Fi • Adventure</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="poster-column space-y-6 lg:mt-12">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="h-6 w-1 bg-[#1ce783] rounded-full"></div>
-                  <span className="text-white font-bold text-lg">Hulu Hits</span>
-                </div>
-                <div className="poster-card group relative aspect-[2/3] overflow-hidden rounded-xl cursor-pointer">
-                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://m.media-amazon.com/images/M/MV5BYWZhNDZiMzAtZmZlYS00MWFmLWE2MWEtNDAxZTZiN2U4Y2U2XkEyXkFqcGc@._V1_.jpg')" }}></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
-                  <div className="absolute bottom-0 left-0 p-6 w-full">
-                    <span className="inline-block px-2 py-1 bg-[#1ce783] text-black text-[10px] font-bold rounded mb-2">HULU</span>
-                    <h4 className="text-white font-bold text-2xl mb-1 leading-tight">The Bear</h4>
-                    <div className="flex items-center text-xs text-gray-300 gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-300">
-                      <span className="material-symbols-outlined text-sm">visibility</span> Watch Now
-                    </div>
-                  </div>
-                </div>
-                <div className="poster-card group relative aspect-video overflow-hidden rounded-xl cursor-pointer">
-                  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcsXQmGdigMv1rSRm-ib4VwYSIhjYP3Bnzgw&s')" }}></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 p-4 w-full">
-                    <span className="inline-block px-2 py-1 bg-[#1ce783] text-black text-[10px] font-bold rounded mb-2">HULU</span>
-                    <h4 className="text-white font-bold text-lg">Only Murders in the Building</h4>
-                    <p className="text-xs text-gray-400 mt-1">Comedy • Mystery</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <TrailersGrid
+              activeId={activeGlobalTrailer?.id}
+              onPlay={(movieData, embedUrl, withAudio) => handlePlay(movieData.id, movieData, embedUrl, withAudio)}
+              onStop={() => setActiveGlobalTrailer(null)}
+            />
           </div>
         </section>
 
@@ -488,19 +416,33 @@ export default function Home() {
               <div className="text-white">Loading Intelligence...</div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                {(curatedData.trending_now || []).slice(0, 5).map((item, index) => (
-                  <div key={index} className="group relative aspect-[2/3] rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/50 shadow-lg">
-                    <div className="absolute top-2 right-2 z-20 bg-primary/90 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">{item.imdb} ★</div>
-                    <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: `url('${getBackdrop(index, 'trending')}')` }}></div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity"></div>
-                    <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                      <h4 className="text-white font-bold text-lg truncate">{item.title}</h4>
-                      <div className="flex items-center gap-2 text-xs text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span>{item.year}</span> • <span>{(item.genres || []).slice(0, 1) || 'Movie'}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                {(curatedData.trending_now || []).slice(0, 5).map((item, index) => {
+                  // Enhanced matching: handle cases like "Bear the Bear" -> "The Bear"
+                  const trailerMatch = TRAILERS_DATA.find(t => {
+                    const t1 = t.title.toLowerCase();
+                    const t2 = item.title.toLowerCase();
+                    return t1.includes(t2) || t2.includes(t1) ||
+                      t1.replace('the ', '').includes(t2.replace('the ', '')) ||
+                      t2.replace('the ', '').includes(t1.replace('the ', ''));
+                  });
+                  const posterUrl = getBackdrop(index, 'trending');
+
+                  return (
+                    <TrailerCard
+                      key={index}
+                      index={`trending-${index}`}
+                      title={item.title}
+                      platform={item.platforms?.[0] || 'Exclusive'}
+                      posterUrl={posterUrl}
+                      trailerUrl={trailerMatch ? trailerMatch.trailerUrl : "https://www.youtube.com/embed/dQw4w9WgXcQ"}
+                      isPlaying={activeGlobalTrailer?.id === `trending-${index}`}
+                      onPlay={(id, embedUrl, withAudio) => handlePlay(`trending-${index}`, item, embedUrl, withAudio)}
+                      onStop={() => setActiveGlobalTrailer(null)}
+                      year={item.year}
+                      aspectRatio="aspect-[2/3]"
+                    />
+                  );
+                })}
               </div>
             )}
           </div>
@@ -543,7 +485,7 @@ export default function Home() {
               {/* Review 2 */}
               <div className="flex flex-col gap-6 rounded-2xl bg-background-dark p-6 border border-white/5">
                 <div className="flex items-center gap-4">
-                  <div className="bg-center bg-no-repeat bg-cover rounded-full size-12 border-2 border-primary/20" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuClqB2-grnhnFTAv4dfRJqLanTNjWt3IqnGxDEmIb3pQlvEVob8Y18j8L6lHMJKOe1MXGaEjzDUjrCfZCaensRalbgqkHJMkAHiO80c73jWALsimyfI4cMNXqThOrqOJd93x79nFiv7EPd5OUFbDodSwtHq5HmAclcmv7OegWYx6LB1a9Ylq-FqqC81ZdWMcMHZtBfPiHms_Xtr5Sd5LQZ-J9Qbd2svcJP1_K8R_SKBVye_MJBG2Rqw06-NTQxFqSMKEluLiWmdBKU")' }}></div>
+                  <div className="bg-center bg-no-repeat bg-cover rounded-full size-12 border-2 border-primary/20" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuClqB2-grnhnFTAv4dfRJqLanTNjWt3IqnGxDEmIb3pQlvEVob8Y18j8L6lHMJKOe1MXGaEjzDUjrCfZCaensRalbgqkHJMkAHiO80c73jWALsimyfI4cMNXqThOrpOJd93x79nFiv7EPd5OUFbDodSwtHq5HmAclcmv7OegWYx6LB1a9Ylq-FqqC81ZdWMcMHZtBfPiHms_Xtr5Sd5LQZ-J9Qbd2svcJP1_K8R_SKBVye_MJBG2Rqw06-NTQxFqSMKEluLiWmdBKU")' }}></div>
                   <div>
                     <p className="text-white text-base font-bold">Marcus T.</p>
                     <p className="text-gray-300 text-xs">Casual Viewer • 1 week ago</p>
@@ -608,19 +550,30 @@ export default function Home() {
             {loading ? (
               <div className="text-white">Loading...</div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                {(curatedData.top_rated || []).slice(0, 6).map((item, index) => (
-                  <div key={index} className="group relative aspect-[2/3] bg-black rounded-lg overflow-hidden cursor-pointer transition-transform hover:-translate-y-2 duration-300 border border-white/5 hover:border-primary/30 shadow-lg">
-                    <div className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: `url('${getBackdrop(index, 'top_rated')}')` }}></div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                    <div className="absolute bottom-3 left-3 right-3">
-                      <h4 className="text-white font-bold text-sm truncate">{item.title}</h4>
-                      <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-1">
-                        <span>{item.year}</span> • <span>{item.imdb} ★</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                {(curatedData.top_rated || []).slice(0, 6).map((item, index) => {
+                  const trailerMatch = TRAILERS_DATA.find(t =>
+                    t.title.toLowerCase().includes(item.title.toLowerCase()) ||
+                    item.title.toLowerCase().includes(t.title.toLowerCase())
+                  );
+                  const posterUrl = getBackdrop(index, 'top_rated');
+
+                  return (
+                    <TrailerCard
+                      key={`top-${index}`}
+                      index={`top-${index}`}
+                      title={item.title}
+                      platform={item.platforms?.[0] || 'Top Rated'}
+                      posterUrl={posterUrl}
+                      trailerUrl={trailerMatch ? trailerMatch.trailerUrl : "https://www.youtube.com/watch?v=SKOIpVLXM7Q"}
+                      isPlaying={activeGlobalTrailer?.id === `top-${index}`}
+                      onPlay={(id, embedUrl, withAudio) => handlePlay(`top-${index}`, item, embedUrl, withAudio)}
+                      onStop={() => setActiveGlobalTrailer(null)}
+                      year={item.year}
+                      aspectRatio="aspect-[2/3]"
+                    />
+                  );
+                })}
               </div>
             )}
           </div>
@@ -652,74 +605,25 @@ export default function Home() {
 
 
 
-        {/* Style Override for Material Symbols filled */}
         <style jsx global>{`
             .material-symbols-outlined.filled {
                 font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             }
-            
-            .poster-column {
-                perspective: 1200px;
-                transform-style: preserve-3d;
-            }
-            .poster-card {
-                transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-                transform-origin: center center;
-                will-change: transform, filter, opacity;
-                backface-visibility: hidden;
-                position: relative;
-            }
-            .poster-card::after {
-                content: "";
-                position: absolute;
-                inset: 0;
-                background: transparent;
-                opacity: 0;
-                transition: opacity 0.5s ease;
-                pointer-events: none;
-                z-index: 20;
-                border-radius: inherit;
-            }
-            /* Hover effects */
-            .poster-column:hover .poster-card {
-                transform: scale(0.9) translateZ(-40px);
-                opacity: 0.5;
-                filter: grayscale(0.8) brightness(0.6) blur(2px);
-            }
-            .poster-column .poster-card:hover {
-                transform: scale(1.1) translateZ(60px) rotateX(0deg) !important;
-                z-index: 100;
-                opacity: 1 !important;
-                filter: grayscale(0) brightness(1.15) blur(0px) !important;
-                box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.9), 0 0 25px rgba(229, 9, 20, 0.2);
-            }
-            .poster-column .poster-card:hover::after {
-                opacity: 0 !important;
-            }
-            /* Sibling selection for 3D effect */
-            .poster-column .poster-card:has(+ .poster-card:hover) {
-                transform: translateZ(0px) rotateX(15deg) scale(0.95) !important;
-                opacity: 0.9 !important;
-                filter: grayscale(0.5) brightness(0.7) blur(1.5px) !important;
-                z-index: 50;
-            }
-            .poster-column .poster-card:has(+ .poster-card:hover)::after {
-                opacity: 1;
-                background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.8) 100%);
-            }
-            .poster-column .poster-card:hover + .poster-card {
-                transform: translateZ(0px) rotateX(-15deg) scale(0.95) !important;
-                opacity: 0.9 !important;
-                filter: grayscale(0.5) brightness(0.7) blur(1.5px) !important;
-                z-index: 50;
-            }
-            .poster-column .poster-card:hover + .poster-card::after {
-                opacity: 1;
-                background: linear-gradient(to top, transparent 30%, rgba(0,0,0,0.8) 100%);
-            }
         `}</style>
+        <Footer />
+
+        {/* Global Trailer Popup */}
+        <AnimatePresence>
+          {activeGlobalTrailer && activeGlobalTrailer.withAudio && (
+            <TrailerModal
+              trailerUrl={activeGlobalTrailer.trailerUrl}
+              title={activeGlobalTrailer.title}
+              withAudio={activeGlobalTrailer.withAudio}
+              onClose={() => setActiveGlobalTrailer(null)}
+            />
+          )}
+        </AnimatePresence>
       </div>
-      <Footer />
     </>
   );
 }

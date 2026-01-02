@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { API_URL } from '../config/api';
 
 export default function Signup() {
     const router = useRouter();
@@ -26,7 +27,7 @@ export default function Signup() {
         setLoading(true);
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/auth/signup', {
+            const res = await fetch(`${API_URL}/auth/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-    AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-    XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-    LineChart, Line
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+    PieChart, Pie, Cell, LineChart, Line, AreaChart, Area
 } from 'recharts';
+import { API_URL } from '../config/api';
 
 const AdminAnalytics = () => {
     // --- State ---
+    const [isMounted, setIsMounted] = useState(false);
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
     const [filters, setFilters] = useState({
         year: 'All Years',
         platform: 'All Platforms',
@@ -83,7 +88,7 @@ const AdminAnalytics = () => {
                 });
 
                 // Using the new API endpoint
-                const response = await fetch(`http://127.0.0.1:8000/admin/user-analytics?${params.toString()}`, {
+                const response = await fetch(`${API_URL}/admin/user-analytics?${params.toString()}`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('userToken')}` } // Corrected key
                 });
 
@@ -484,26 +489,28 @@ const AdminAnalytics = () => {
                         Content Release Timeline
                     </h3>
                     <div className="h-[300px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={yearChartData}>
-                                <defs>
-                                    <linearGradient id="colorYear" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#e60a15" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#e60a15" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                                <XAxis dataKey="year" stroke="#666" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} dy={10} />
-                                <YAxis stroke="#666" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#fff' }}
-                                    itemStyle={{ color: '#fff' }}
-                                    labelStyle={{ color: '#fff' }}
-                                    cursor={{ stroke: '#e60a15', strokeWidth: 1, strokeDasharray: '4 4' }}
-                                />
-                                <Area type="monotone" dataKey="count" stroke="#e60a15" strokeWidth={2} fillOpacity={1} fill="url(#colorYear)" />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={yearChartData}>
+                                    <defs>
+                                        <linearGradient id="colorYear" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#e60a15" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#e60a15" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                    <XAxis dataKey="year" stroke="#666" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} dy={10} />
+                                    <YAxis stroke="#666" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#fff' }}
+                                        itemStyle={{ color: '#fff' }}
+                                        labelStyle={{ color: '#fff' }}
+                                        cursor={{ stroke: '#e60a15', strokeWidth: 1, strokeDasharray: '4 4' }}
+                                    />
+                                    <Area type="monotone" dataKey="count" stroke="#e60a15" strokeWidth={2} fillOpacity={1} fill="url(#colorYear)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
 
@@ -515,23 +522,25 @@ const AdminAnalytics = () => {
                         Platform Share
                     </h3>
                     <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={platformChartData} layout="vertical">
-                                <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
-                                <XAxis type="number" stroke="#666" tick={{ fontSize: 10, fill: '#9ca3af' }} hide />
-                                <YAxis dataKey="name" type="category" stroke="#fff" tick={{ fontSize: 11, fontWeight: 'bold', fill: '#fff' }} width={70} axisLine={false} tickLine={false} />
-                                <Tooltip
-                                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#fff' }}
-                                    itemStyle={{ color: '#fff' }}
-                                />
-                                <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={32}>
-                                    {platformChartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={platformChartData} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
+                                    <XAxis type="number" stroke="#666" tick={{ fontSize: 10, fill: '#9ca3af' }} hide />
+                                    <YAxis dataKey="name" type="category" stroke="#fff" tick={{ fontSize: 11, fontWeight: 'bold', fill: '#fff' }} width={70} axisLine={false} tickLine={false} />
+                                    <Tooltip
+                                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                        contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#fff' }}
+                                        itemStyle={{ color: '#fff' }}
+                                    />
+                                    <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={32}>
+                                        {platformChartData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
             </div>
@@ -545,25 +554,27 @@ const AdminAnalytics = () => {
                         Top Genres by User Views
                     </h3>
                     <div className="h-[300px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={genreViewsChartData}>
-                                <defs>
-                                    <linearGradient id="colorGenreViews" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.8} />
-                                        <stop offset="100%" stopColor="#0ea5e9" stopOpacity={0.2} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                                <XAxis dataKey="name" stroke="#666" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} dy={10} />
-                                <YAxis stroke="#666" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-                                <Tooltip
-                                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#fff' }}
-                                    itemStyle={{ color: '#fff' }}
-                                />
-                                <Bar dataKey="value" fill="url(#colorGenreViews)" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={genreViewsChartData}>
+                                    <defs>
+                                        <linearGradient id="colorGenreViews" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.8} />
+                                            <stop offset="100%" stopColor="#0ea5e9" stopOpacity={0.2} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                    <XAxis dataKey="name" stroke="#666" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} dy={10} />
+                                    <YAxis stroke="#666" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                                    <Tooltip
+                                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                        contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#fff' }}
+                                        itemStyle={{ color: '#fff' }}
+                                    />
+                                    <Bar dataKey="value" fill="url(#colorGenreViews)" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
 
@@ -574,29 +585,31 @@ const AdminAnalytics = () => {
                         Content Types
                     </h3>
                     <div className="h-[300px] flex-1">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={typeChartData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={70}
-                                    outerRadius={90}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                    stroke="none"
-                                >
-                                    {typeChartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#fff' }}
-                                    itemStyle={{ color: '#fff' }}
-                                />
-                                <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ paddingTop: '20px', color: '#fff' }} />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={typeChartData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={70}
+                                        outerRadius={90}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                        stroke="none"
+                                    >
+                                        {typeChartData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', color: '#fff' }}
+                                        itemStyle={{ color: '#fff' }}
+                                    />
+                                    <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ paddingTop: '20px', color: '#fff' }} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
             </div>

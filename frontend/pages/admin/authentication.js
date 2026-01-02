@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import AdminSidebar from '../../components/AdminSidebar';
+import { API_URL } from '../../config/api';
 
 export default function AuthLogs() {
     const [logs, setLogs] = useState([]);
@@ -24,7 +25,7 @@ export default function AuthLogs() {
         try {
             const token = localStorage.getItem('userToken');
             // Fetching users to "simulate" logs from them
-            const res = await fetch(`http://127.0.0.1:8000/admin/user-analytics?page=${page}&limit=10`, {
+            const res = await fetch(`${API_URL}/admin/user-analytics?page=${page}&limit=10`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {

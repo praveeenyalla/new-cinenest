@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { API_URL } from "../config/api";
 import UserAnalytics from "../components/UserAnalytics";
+import TrendingMovies from "../components/TrendingMovies";
+
 
 export default function Dashboard() {
   const [platformStats, setPlatformStats] = useState([]);
@@ -38,7 +40,7 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="flex-grow w-full px-4 md:px-10 py-8 mx-auto max-w-7xl font-display text-white">
+      <div className="flex-grow w-full px-4 md:px-10 pt-32 pb-12 mx-auto max-w-7xl font-display text-white">
         {/* Headline */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
@@ -79,7 +81,10 @@ export default function Dashboard() {
                 </p>
               </div>
               <div className="flex flex-col gap-3 min-w-[200px] w-full md:w-auto z-10">
-                <button className="group flex cursor-pointer items-center justify-center rounded-lg h-10 px-6 bg-primary hover:bg-primary-dark transition-colors text-white text-sm font-bold shadow-[0_0_15px_rgba(230,10,21,0.3)]">
+                <button
+                  onClick={() => setActiveTab("User Analysis")}
+                  className="group flex cursor-pointer items-center justify-center rounded-lg h-10 px-6 bg-primary hover:bg-primary-dark transition-colors text-white text-sm font-bold shadow-[0_0_15px_rgba(230,10,21,0.3)]"
+                >
                   <span>View Detailed Report</span>
                   <span className="material-symbols-outlined ml-2 text-sm transition-transform group-hover:translate-x-1">arrow_forward</span>
                 </button>
@@ -416,8 +421,11 @@ export default function Dashboard() {
 
           {/* User Analysis Section */}
           {activeTab === "User Analysis" && (
-            <div className="col-span-1 lg:col-span-2">
+            <div className="col-span-1 lg:col-span-2 flex flex-col gap-12">
               <UserAnalytics />
+              <div className="pt-12 border-t border-white/5">
+                <TrendingMovies isDashboard={true} />
+              </div>
             </div>
           )}
 

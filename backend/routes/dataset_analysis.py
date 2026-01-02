@@ -1,7 +1,7 @@
 import os
 import google.generativeai as genai
 from fastapi import APIRouter, HTTPException
-from database import content_collection
+import database
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,11 +16,11 @@ model = genai.GenerativeModel("gemini-pro")
 @router.get("/overview")
 async def get_dataset_analytics():
     try:
-        if content_collection is None:
+        if database.content_collection is None:
              raise Exception("Database connection not established")
 
         # 1. Total Count
-        total_count = content_collection.count_documents({})
+        total_count = database.content_collection.count_documents({})
         
         # 2. Platform Distribution (Aggregation)
         pipeline = [
@@ -36,7 +36,7 @@ async def get_dataset_analytics():
         
         platforms = []
         try:
-            agg_result = list(content_collection.aggregate(pipeline))
+            agg_result = list(database.content_collection.aggregate(pipeline))
             if agg_result:
                 res = agg_result[0]
                 for key in ["Netflix", "Hulu", "Prime Video", "Disney+"]:
@@ -50,7 +50,7 @@ async def get_dataset_analytics():
         # In Mongo 4.2+ we can use $split, but python side on sample is safer if schema varies
         
         # Efficient Sample for Text Analysis
-        cursor = content_collection.aggregate([{"$sample": {"size": 500}}])
+        cursor = database.content_collection.aggregate([{"$sample": {"size": 500}}])
         data_sample = list(cursor)
         
         genre_counts = {}
@@ -65,7 +65,7 @@ async def get_dataset_analytics():
         genres = [{"_id": k, "count": v} for k, v in sorted_genres]
 
         # 4. Top Rated
-        top_rated_cursor = content_collection.find().sort("imdb", -1).limit(10)
+        top_rated_cursor = database.content_collection.find().sort("imdb", -1).limit(10)
         top_rated_clean = [{"title": x.get("title"), "imdb": x.get("imdb"), "platform": x.get("platform")} for x in top_rated_cursor]
 
         # Build prompt for Gemini

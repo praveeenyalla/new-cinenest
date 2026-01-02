@@ -10,6 +10,7 @@ export default function AdminSidebar() {
     { name: 'Comments', icon: '💬', path: '/admin/comments' },
     { name: 'Users', icon: '👥', path: '/admin/users' },
     { name: 'Movie List', icon: '🎬', path: '/admin/content' },
+    { name: 'Movie Analytics', icon: '📊', path: '/admin/movies-analytics' },
     { name: 'User Analysis', icon: '📈', path: '/admin/analytics' },
     { name: 'Authentication', icon: '🔒', path: '/admin/authentication', hasSub: true },
   ];
@@ -95,11 +96,12 @@ export default function AdminSidebar() {
         }
 
         .logo-text {
-          font-weight: 800;
-          font-size: 1.3rem;
+          font-weight: 900;
+          font-size: 1.4rem;
           letter-spacing: 1px;
           color: #fff;
           font-family: 'Inter', sans-serif;
+          text-shadow: 0 0 10px rgba(229, 9, 20, 0.3);
         }
 
         .nav-menu {

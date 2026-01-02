@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
+import { API_URL } from '../config/api';
 
 export default function AuthPage() {
     const router = useRouter();
@@ -47,7 +48,7 @@ export default function AuthPage() {
                 params.append('username', formData.email);
                 params.append('password', formData.password);
 
-                const res = await fetch('http://127.0.0.1:8000/auth/login', {
+                const res = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: params.toString(),
@@ -72,7 +73,7 @@ export default function AuthPage() {
                     throw new Error("Passwords do not match");
                 }
 
-                const res = await fetch('http://127.0.0.1:8000/auth/signup', {
+                const res = await fetch(`${API_URL}/auth/signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -99,7 +100,7 @@ export default function AuthPage() {
     return (
         <div className="font-display bg-[#181111] text-white antialiased selection:bg-[#e60a15] selection:text-white min-h-screen">
             <Head>
-                <title>CINE NEST - {isLogin ? 'Sign In' : 'Sign Up'}</title>
+                <title>{`CINE NEST - ${isLogin ? 'Sign In' : 'Sign Up'}`}</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             </Head>
 

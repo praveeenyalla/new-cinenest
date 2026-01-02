@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime, timedelta
-from database import user_collection
+import database
 import bcrypt
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -78,10 +78,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise credentials_exception
     
-    if user_collection is None:
+    if database.user_collection is None:
          raise HTTPException(status_code=500, detail="Database not connected")
 
-    user = user_collection.find_one({"email": token_data.email})
+    user = database.user_collection.find_one({"email": token_data.email})
     if user is None:
         raise credentials_exception
     
@@ -92,14 +92,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 @router.post("/signup", response_model=Token)
 async def signup(user: UserSignup):
-    if user_collection is None:
+    if database.user_collection is None:
         raise HTTPException(status_code=500, detail="Database connection error")
 
     # Check if user exists
-    if user_collection.find_one({"email": user.email}):
+    if database.user_collection.find_one({"email": user.email}):
         raise HTTPException(status_code=400, detail="Email already registered")
         
-    if user_collection.find_one({"username": user.username}):
+    if database.user_collection.find_one({"username": user.username}):
         raise HTTPException(status_code=400, detail="Username already taken")
     
     # Hash password
@@ -117,7 +117,7 @@ async def signup(user: UserSignup):
         "role": "user"
     }
     
-    result = user_collection.insert_one(new_user)
+    result = database.user_collection.insert_one(new_user)
     
     # Create Token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -130,11 +130,11 @@ async def signup(user: UserSignup):
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     # OAuth2PasswordRequestForm "username" field will contain the email
-    if user_collection is None:
+    if database.user_collection is None:
         raise HTTPException(status_code=500, detail="Database connection error")
 
     # Allow login with either email or username
-    user = user_collection.find_one({
+    user = database.user_collection.find_one({
         "$or": [
             {"email": form_data.username},
             {"username": form_data.username}

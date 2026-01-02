@@ -1,3 +1,4 @@
+// Refresh: 2025-12-31T00:50:00
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
@@ -61,7 +62,8 @@ export default function ContentManagement() {
                 }));
 
                 // Combine
-                setContent([...normalizedNewData, ...normalizedFinalData]);
+                const combined = [...normalizedNewData, ...normalizedFinalData];
+                setContent(mapMovies(combined));
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to load data", err);

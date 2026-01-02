@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import AdminSidebar from '../../components/AdminSidebar';
+import { API_URL } from '../../config/api';
 
 export default function UserManagement() {
     const [users, setUsers] = useState([]);
@@ -17,7 +18,7 @@ export default function UserManagement() {
         setLoading(true);
         try {
             const token = localStorage.getItem('userToken');
-            const res = await fetch(`http://127.0.0.1:8000/admin/user-analytics?page=${page}&limit=10`, {
+            const res = await fetch(`${API_URL}/admin/user-analytics?page=${page}&limit=10`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {

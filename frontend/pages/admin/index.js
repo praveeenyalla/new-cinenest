@@ -4,13 +4,12 @@ import AdminSidebar from '../../components/AdminSidebar';
 
 import AdminAnalytics from '../../components/AdminAnalytics';
 import {
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    PieChart, Pie, Cell,
-    BarChart, Bar,
-    LineChart, Line,
-    Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-    ScatterChart, Scatter, ZAxis
+    ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+    BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
+    RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+    ScatterChart, Scatter, ZAxis, LabelList
 } from 'recharts';
+import { API_URL } from '../../config/api';
 
 // --- Mock Data ---
 const platformTrafficData = [
@@ -93,9 +92,9 @@ const radarData = [
 ];
 
 const scatterData = [
-    { x: 100, y: 200, z: 200 }, { x: 120, y: 100, z: 260 },
-    { x: 170, y: 300, z: 400 }, { x: 140, y: 250, z: 280 },
-    { x: 150, y: 400, z: 500 }, { x: 110, y: 280, z: 200 },
+    { x: 100, y: 200, z: 200, name: 'Peak' }, { x: 120, y: 100, z: 260, name: 'Low' },
+    { x: 170, y: 300, z: 400, name: 'Growth' }, { x: 140, y: 250, z: 280, name: 'Stable' },
+    { x: 150, y: 400, z: 500, name: 'Viral' }, { x: 110, y: 280, z: 200, name: 'Active' },
 ];
 
 export default function AdminDashboard() {
@@ -111,7 +110,7 @@ export default function AdminDashboard() {
     const fetchTrafficData = async () => {
         try {
             const token = localStorage.getItem('userToken');
-            const res = await fetch('http://127.0.0.1:8000/admin/platform-traffic', {
+            const res = await fetch(`${API_URL}/admin/platform-traffic`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -457,27 +456,8 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
 
-                            {/* 2. Content Performance Radar */}
-                            <div className="glass-panel rounded-xl p-6">
-                                <h3 className="font-bold text-lg text-white mb-4">Content Metrics Radar</h3>
-                                <div className="h-[250px]">
-                                    {isMounted && (
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                                                <PolarGrid stroke="#333" />
-                                                <PolarAngleAxis dataKey="subject" tick={{ fill: '#9ca3af', fontSize: 10 }} />
-                                                <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                                                <Radar name="Review A" dataKey="A" stroke="#e60a15" fill="#e60a15" fillOpacity={0.4} />
-                                                <Radar name="Review B" dataKey="B" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.4} />
-                                                <Tooltip contentStyle={{ backgroundColor: '#0a0a0a', border: 'none', color: '#fff' }} />
-                                            </RadarChart>
-                                        </ResponsiveContainer>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* 3. Engagement Scatter Plot */}
-                            <div className="glass-panel rounded-xl p-6">
+                            {/* Engagement Scatter Plot - Expanded */}
+                            <div className="glass-panel rounded-xl p-6 md:col-span-2">
                                 <h3 className="font-bold text-lg text-white mb-4">Engagement Correlations</h3>
                                 <div className="h-[250px]">
                                     {isMounted && (
@@ -487,8 +467,15 @@ export default function AdminDashboard() {
                                                 <XAxis type="number" dataKey="x" name="Time" tick={{ fill: '#666', fontSize: 10 }} axisLine={false} tickLine={false} />
                                                 <YAxis type="number" dataKey="y" name="Rating" tick={{ fill: '#666', fontSize: 10 }} axisLine={false} tickLine={false} />
                                                 <ZAxis type="number" dataKey="z" range={[60, 400]} name="Score" />
-                                                <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#0a0a0a', border: 'none', color: '#fff' }} />
-                                                <Scatter name="A school" data={scatterData} fill="#e60a15" shape="circle" />
+                                                <Tooltip
+                                                    cursor={{ strokeDasharray: '3 3' }}
+                                                    contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #333', borderRadius: '8px' }}
+                                                    itemStyle={{ color: '#fff' }}
+                                                    labelStyle={{ color: '#fff' }}
+                                                />
+                                                <Scatter name="A school" data={scatterData} fill="#e60a15" shape="circle">
+                                                    <LabelList dataKey="name" position="top" style={{ fill: '#fff', fontSize: '10px' }} />
+                                                </Scatter>
                                             </ScatterChart>
                                         </ResponsiveContainer>
                                     )}

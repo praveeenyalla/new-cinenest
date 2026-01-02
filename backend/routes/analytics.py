@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from fastapi import APIRouter, Query
 from typing import Optional
+import database
 
 router = APIRouter()
 

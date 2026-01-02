@@ -1,9 +1,11 @@
 from fastapi import APIRouter
-from database import content_collection
+import database
 
 router = APIRouter()
 
 @router.get('/')
 def trending_items():
-    items = list(content_collection.find().sort("views", -1).limit(10))
+    if database.content_collection is None:
+        return {"trending": [], "error": "Database not connected"}
+    items = list(database.content_collection.find().sort("views", -1).limit(10))
     return {"trending": items}

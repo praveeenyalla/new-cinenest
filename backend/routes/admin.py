@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends, status, Body, Header
 from pydantic import BaseModel
-from database import content_collection, user_collection, db, user_analytics_collection
+import database
 
 import numpy as np
 import pandas as pd # Kept for stats if available
@@ -46,34 +46,34 @@ async def login_admin_mock():
 
 @router.get("/content")
 async def get_all_content(admin: dict = Depends(get_current_admin)):
-    if content_collection is None: return []
-    cursor = content_collection.find()
+    if database.content_collection is None: return []
+    cursor = database.content_collection.find()
     return [serialize_doc(doc, str(doc["_id"])) for doc in cursor]
 
 @router.post("/content", status_code=status.HTTP_201_CREATED)
 async def create_content(item: ContentItem, admin: dict = Depends(get_current_admin)):
-    if content_collection is None: return
+    if database.content_collection is None: return
     new_item = item.dict()
     new_item["created_at"] = datetime.utcnow()
-    result = content_collection.insert_one(new_item)
+    result = database.content_collection.insert_one(new_item)
     return {"message": "Content created", "id": str(result.inserted_id)}
 
 @router.put("/content/{item_id}")
 async def update_content(item_id: str, item: ContentItem, admin: dict = Depends(get_current_admin)):
-    if content_collection is None: return
+    if database.content_collection is None: return
     try:
         from bson.objectid import ObjectId
-        content_collection.update_one({"_id": ObjectId(item_id)}, {"$set": item.dict()})
+        database.content_collection.update_one({"_id": ObjectId(item_id)}, {"$set": item.dict()})
     except Exception:
         raise HTTPException(status_code=404, detail="Content not found or update failed")
     return {"message": "Content updated successfully"}
 
 @router.delete("/content/{item_id}")
 async def delete_content(item_id: str, admin: dict = Depends(get_current_admin)):
-    if content_collection is None: return
+    if database.content_collection is None: return
     try:
         from bson.objectid import ObjectId
-        content_collection.delete_one({"_id": ObjectId(item_id)})
+        database.content_collection.delete_one({"_id": ObjectId(item_id)})
     except Exception:
         pass 
     return {"message": "Content deleted successfully"}
@@ -82,16 +82,16 @@ async def delete_content(item_id: str, admin: dict = Depends(get_current_admin))
 
 @router.get("/users")
 async def get_all_users(admin: dict = Depends(get_current_admin)):
-    if user_collection is None: return []
-    cursor = user_collection.find().limit(100)
+    if database.user_collection is None: return []
+    cursor = database.user_collection.find().limit(100)
     return [serialize_doc(doc, str(doc["_id"])) for doc in cursor]
 
 @router.delete("/user/{user_id}")
 async def delete_user(user_id: str, admin: dict = Depends(get_current_admin)):
-    if user_collection is None: return
+    if database.user_collection is None: return
     try:
         from bson.objectid import ObjectId
-        user_collection.delete_one({"_id": ObjectId(user_id)})
+        database.user_collection.delete_one({"_id": ObjectId(user_id)})
     except Exception:
         pass
     return {"message": "User deleted successfully"}
@@ -123,8 +123,8 @@ async def get_dashboard_stats(admin: dict = Depends(get_current_admin)):
     else:
         # Fallback to DB count
         total_movies = 0
-        if content_collection is not None:
-             total_movies = content_collection.count_documents({})
+        if database.content_collection is not None:
+             total_movies = database.content_collection.count_documents({})
 
     # Platform counts
     platforms = ["Netflix", "Hulu", "Prime Video", "Disney+"]
@@ -146,8 +146,8 @@ async def get_dashboard_stats(admin: dict = Depends(get_current_admin)):
 
     # Total Users
     total_users = 0
-    if user_collection is not None:
-         total_users = user_collection.count_documents({})
+    if database.user_collection is not None:
+         total_users = database.user_collection.count_documents({})
 
     userData = [
         {"name": "New Customer", "value": int(total_users * 0.25)},
@@ -199,8 +199,8 @@ async def get_dashboard_stats(admin: dict = Depends(get_current_admin)):
 
     # Top Viewed (From DB or DF)
     top_viewed = []
-    if content_collection is not None:
-        cursor = content_collection.find().sort("views", -1).limit(5)
+    if database.content_collection is not None:
+        cursor = database.content_collection.find().sort("views", -1).limit(5)
         for doc in cursor:
             top_viewed.append(serialize_doc(doc, str(doc["_id"])))
             
@@ -235,8 +235,8 @@ async def get_dashboard_stats(admin: dict = Depends(get_current_admin)):
 @router.get("/ratings")
 async def get_ratings(admin: dict = Depends(get_current_admin)):
     top_rated = []
-    if content_collection is not None:
-        cursor = content_collection.find({"imdb": {"$gt": 8.0}}).sort("imdb", -1).limit(10)
+    if database.content_collection is not None:
+        cursor = database.content_collection.find({"imdb": {"$gt": 8.0}}).sort("imdb", -1).limit(10)
         for doc in cursor:
             item = serialize_doc(doc, str(doc["_id"]))
             if "votes" not in item: item["votes"] = np.random.randint(10000, 2000000)
@@ -253,8 +253,8 @@ async def get_comments(admin: dict = Depends(get_current_admin)):
     platforms = ["Netflix", "Prime Video", "Hulu", "Disney+"]
     comments_list = ["Amazing!", "Great visuals.", "Slow start.", "Expected more."]
     movie_titles = []
-    if content_collection is not None:
-        cursor = content_collection.find().limit(20)
+    if database.content_collection is not None:
+        cursor = database.content_collection.find().limit(20)
         movie_titles = [doc.get("title") for doc in cursor if doc.get("title")]
     if not movie_titles: movie_titles = ["Inception", "The Matrix"]
 
@@ -274,8 +274,8 @@ async def get_comments(admin: dict = Depends(get_current_admin)):
 @router.get("/auth-users")
 async def get_auth_users(admin: dict = Depends(get_current_admin)):
     users = []
-    if user_collection is not None:
-        cursor = user_collection.find().limit(50)
+    if database.user_collection is not None:
+        cursor = database.user_collection.find().limit(50)
         for doc in cursor:
             data = serialize_doc(doc, str(doc["_id"]))
             users.append({
@@ -301,7 +301,7 @@ async def get_advanced_content_list(
     search: str = "",
     admin: dict = Depends(get_current_admin)
 ):
-    if content_collection is None: return {"data": [], "total": 0, "page": 1, "pages": 1}
+    if database.content_collection is None: return {"data": [], "total": 0, "page": 1, "pages": 1}
     
     query = {}
     if type_filter != "all": 
@@ -316,9 +316,9 @@ async def get_advanced_content_list(
     
     sort_order = -1 if order == "desc" else 1
     
-    total = content_collection.count_documents(query)
+    total = database.content_collection.count_documents(query)
     
-    cursor = content_collection.find(query).sort(sort_by, sort_order).skip((page - 1) * limit).limit(limit)
+    cursor = database.content_collection.find(query).sort(sort_by, sort_order).skip((page - 1) * limit).limit(limit)
     
     data = [serialize_doc(doc, str(doc["_id"])) for doc in cursor]
     
@@ -338,7 +338,7 @@ async def get_user_analytics(
     limit: int = 20,
     admin: dict = Depends(get_current_admin)
 ):
-    if user_analytics_collection is None:
+    if database.user_analytics_collection is None:
         return {"data": [], "total": 0, "page": page, "pages": 0}
 
     query = {}
@@ -353,9 +353,9 @@ async def get_user_analytics(
         # Check if category exists in preferences or history
         query["preferences"] = category_filter
 
-    total = user_analytics_collection.count_documents(query)
+    total = database.user_analytics_collection.count_documents(query)
     # Sort by joined_date desc by default
-    cursor = user_analytics_collection.find(query).sort("joined_date", -1).skip((page - 1) * limit).limit(limit)
+    cursor = database.user_analytics_collection.find(query).sort("joined_date", -1).skip((page - 1) * limit).limit(limit)
     
     users = []
     for doc in cursor:
@@ -373,7 +373,7 @@ async def get_user_analytics(
 
 @router.get("/platform-traffic")
 async def get_platform_traffic(admin: dict = Depends(get_current_admin)):
-    if user_analytics_collection is None:
+    if database.user_analytics_collection is None:
         return []
 
     # Aggregation Pipeline:
@@ -395,7 +395,7 @@ async def get_platform_traffic(admin: dict = Depends(get_current_admin)):
         {"$sort": {"_id.date": 1}}
     ]
 
-    results = user_analytics_collection.aggregate(pipeline)
+    results = database.user_analytics_collection.aggregate(pipeline)
 
     raw_map = {}
     global_max = 0

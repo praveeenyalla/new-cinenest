@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { API_URL } from '../config/api';
+import TrailerModal from '../components/TrailerModal';
+import { TRAILERS_DATA } from '../components/TrailersGrid';
 
 export default function AICommandCenter() {
   const [messages, setMessages] = useState([]);
@@ -10,7 +13,28 @@ export default function AICommandCenter() {
   const [userEmail, setUserEmail] = useState(''); // Default/Loading state
   const [username, setUsername] = useState('Commander');
   const [history, setHistory] = useState([]);
+  const [activeTrailer, setActiveTrailer] = useState(null);
   const chatEndRef = useRef(null);
+
+  const handlePlayMovie = (movie) => {
+    // 1. Try to find a hardcoded trailer first
+    const match = TRAILERS_DATA.find(t =>
+      t.title.toLowerCase().includes(movie.title.toLowerCase()) ||
+      movie.title.toLowerCase().includes(t.title.toLowerCase())
+    );
+
+    let url = match ? match.trailerUrl : "https://www.youtube.com/embed/dQw4w9WgXcQ"; // Default fallback
+
+    // Ensure embed format
+    if (url.includes('watch?v=')) {
+      url = url.replace('watch?v=', 'embed/');
+    }
+
+    setActiveTrailer({
+      title: movie.title,
+      trailerUrl: url
+    });
+  };
 
   // --- 1. Initialization & History ---
   useEffect(() => {
@@ -58,14 +82,27 @@ export default function AICommandCenter() {
 
     try {
       const token = localStorage.getItem('userToken') || localStorage.getItem('adminToken');
-      const response = await fetch(`${API_URL}/ai/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ user_email: userEmail, message: text, category }),
-      });
+
+      // Determine if it's a search query or general chat
+      const isSearchQuery = /movie|show|film|recommend|best|top|high rated|202[0-9]/i.test(text);
+
+      let response;
+      if (isSearchQuery) {
+        response = await fetch(`${API_URL}/ai/search?q=${encodeURIComponent(text)}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      } else {
+        response = await fetch(`${API_URL}/ai/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ user_email: userEmail, message: text, category }),
+        });
+      }
 
       if (response.status === 401) {
         setMessages(prev => [...prev, { role: 'ai', text: 'Authentication failed. Please login to use Brain Engine.' }]);
@@ -76,7 +113,8 @@ export default function AICommandCenter() {
 
       const aiMsg = {
         role: 'ai',
-        text: data.response || data.text, // Handle backend returning "response" or "text"
+        text: data.response || data.text || (isSearchQuery ? `I found ${data.results?.length || 0} matches for your request:` : "I've analyzed your request."),
+        results: data.results || null,
         chartData: data.chartData,
         chartType: data.chartType
       };
@@ -96,8 +134,9 @@ export default function AICommandCenter() {
     let prompt = "";
     switch (action) {
       case 'surprise': prompt = "Surprise me with a hidden gem movie recommendation that has high ratings but low popularity."; break;
-      case 'explain': prompt = "Explain why you recommended the previous movie purely based on cinematography and tone."; break;
-      case 'soundtrack': prompt = "Find similar soundtracks to the movie Blade Runner 2049."; break;
+      case 'explain': prompt = "Explain why you recommended the last movie purely based on cinematography and tone."; break;
+      case '2025': prompt = "What are the best movies releasing in 2025?"; break;
+      case 'netflix': prompt = "Search for top rated movies on Netflix for 2026."; break;
       default: return;
     }
     sendMessage(prompt);
@@ -123,7 +162,7 @@ export default function AICommandCenter() {
                 <span className="material-symbols-outlined text-white text-[20px]">movie_filter</span>
               </div>
               <div>
-                <h1 className="text-white text-lg font-bold tracking-widest leading-none group-hover:text-primary transition-colors">CINE NEST</h1>
+                <h1 className="text-white text-xl font-black tracking-widest leading-none group-hover:text-primary transition-colors drop-shadow-lg">CINE NEST</h1>
                 <p className="text-gray-500 text-xs font-medium tracking-wide">BRAIN ENGINE v2.4</p>
               </div>
             </div>
@@ -225,13 +264,74 @@ export default function AICommandCenter() {
                 </div>
               )}
 
-              <div className={`${m.role === 'user' ? 'max-w-[80%] md:max-w-[60%]' : 'max-w-[90%] md:max-w-[75%]'} flex flex-col gap-2`}>
+              <div className={`${m.role === 'user' ? 'max-w-[80%] md:max-w-[60%]' : (m.results ? 'max-w-full' : 'max-w-[90%] md:max-w-[75%]')} flex flex-col gap-2`}>
                 <div className={`
                             ${m.role === 'user' ? 'bg-[#222] rounded-2xl rounded-tr-sm border-white/10' : 'bg-surface-dark rounded-2xl rounded-tl-sm border-white/5'}
                             border text-white px-6 py-4 shadow-lg backdrop-blur-md
                         `}>
                   <p className="text-base font-light leading-relaxed whitespace-pre-wrap">{m.text}</p>
                 </div>
+
+                {/* AI Movie Recommendations Cards */}
+                {m.results && m.results.length > 0 && (
+                  <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar mt-2 max-w-full">
+                    {m.results.map((movie, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => handlePlayMovie(movie)}
+                        className="min-w-[220px] w-[220px] bg-[#1a1a1a] border border-white/10 rounded-xl overflow-hidden group/card hover:border-primary/50 transition-all shadow-2xl cursor-pointer"
+                      >
+                        <div className="aspect-[2/3] relative bg-[#222] flex items-center justify-center overflow-hidden">
+                          {movie.image ? (
+                            <img src={movie.image} alt={movie.title} className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-500" />
+                          ) : (
+                            <div className="flex flex-col items-center gap-2">
+                              <span className="material-symbols-outlined text-4xl text-gray-700">movie</span>
+                              <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">No Poster</span>
+                            </div>
+                          )}
+
+                          {/* Play Button Overlay */}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 z-10">
+                            <div className="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(229,9,20,0.5)] transform scale-75 group-hover/card:scale-100 transition-transform duration-500">
+                              <span className="material-symbols-outlined text-3xl filled">play_arrow</span>
+                            </div>
+                          </div>
+
+                          <div className="absolute top-2 right-2 flex flex-col gap-1 items-end z-20">
+                            <div className="bg-primary/90 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-lg flex items-center gap-1 backdrop-blur-sm">
+                              <span className="material-symbols-outlined text-[10px] filled">star</span>
+                              {movie.imdb}
+                            </div>
+                            {movie.is_realtime && (
+                              <div className="bg-green-600/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-lg uppercase tracking-tighter backdrop-blur-sm animate-pulse">
+                                Live
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Decorative overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60"></div>
+                        </div>
+                        <div className="p-3">
+                          <h4 className="text-white text-sm font-bold truncate group-hover/card:text-primary transition-colors">{movie.title}</h4>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-[10px] text-gray-500">{movie.year}</span>
+                            <div className="flex gap-1">
+                              {movie.platforms && movie.platforms.slice(0, 2).map((p, pidx) => (
+                                <span key={pidx} className={`text-[8px] font-bold px-1 rounded ${p === 'Netflix' ? 'bg-red-600' : p === 'Disney+' ? 'bg-blue-600' : 'bg-green-600'} text-white`}>{p}</span>
+                              ))}
+                            </div>
+                          </div>
+                          {movie.description && (
+                            <p className="text-[9px] text-gray-400 mt-2 line-clamp-2 leading-tight italic">"{movie.description}"</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {/* If chart data exists, one could render it here */}
                 {m.chartData && (
                   <div className="mt-2 text-xs text-primary font-mono">* Visual data available in Analytics Hub</div>
@@ -261,7 +361,7 @@ export default function AICommandCenter() {
           )}
 
           <div ref={chatEndRef} />
-          <div className="h-24"></div> {/* Spacer */}
+          <div className="h-40"></div> {/* Enhanced Spacer */}
         </div>
 
         {/* INPUT AREA */}
@@ -273,11 +373,14 @@ export default function AICommandCenter() {
                 <span className="material-symbols-outlined text-[14px] text-primary group-hover:scale-110 transition-transform">bolt</span>
                 Surprise me
               </button>
-              <button onClick={() => handleQuickAction('explain')} className="whitespace-nowrap px-4 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-gray-300 transition-all hover:text-white">
-                Explain recommendation
+              <button onClick={() => handleQuickAction('2025')} className="whitespace-nowrap px-4 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-gray-300 transition-all hover:text-white">
+                Best of 2025
               </button>
-              <button onClick={() => handleQuickAction('soundtrack')} className="whitespace-nowrap px-4 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-gray-300 transition-all hover:text-white">
-                Find similar soundtracks
+              <button onClick={() => handleQuickAction('netflix')} className="whitespace-nowrap px-4 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-gray-300 transition-all hover:text-white">
+                Netflix 2026
+              </button>
+              <button onClick={() => handleQuickAction('explain')} className="whitespace-nowrap px-4 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-gray-300 transition-all hover:text-white">
+                Explain logic
               </button>
             </div>
 
@@ -307,11 +410,21 @@ export default function AICommandCenter() {
         </div>
       </main>
 
+      <AnimatePresence>
+        {activeTrailer && (
+          <TrailerModal
+            trailerUrl={activeTrailer.trailerUrl}
+            title={activeTrailer.title}
+            onClose={() => setActiveTrailer(null)}
+          />
+        )}
+      </AnimatePresence>
+
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .mask-linear-fade { mask-image: linear-gradient(to right, black 85%, transparent 100%); }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #e60a15; }

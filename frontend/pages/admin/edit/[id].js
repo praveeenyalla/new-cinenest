@@ -106,7 +106,7 @@ export default function EditContent() {
     return (
         <div className="admin-page">
             <Head>
-                <title>Edit {formData.title} | CINE NEST Admin</title>
+                <title>{`Edit ${formData.title} | CINE NEST Admin`}</title>
             </Head>
 
             <AdminSidebar />

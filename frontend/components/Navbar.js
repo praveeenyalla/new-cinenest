@@ -38,14 +38,14 @@ export default function Navbar() {
             <div className="size-8 text-primary">
               <span className="material-symbols-outlined text-4xl">movie_filter</span>
             </div>
-            <h1 className="text-xl font-bold tracking-widest uppercase text-white">CINE NEST</h1>
+            <h1 className="text-2xl font-black tracking-widest uppercase text-white drop-shadow-lg">CINE NEST</h1>
           </div>
         </Link>
         <div className="flex items-center gap-8">
           <nav className="hidden md:flex items-center gap-8">
             <Link href="/" className="text-sm font-medium text-white hover:text-primary transition-colors">Home</Link>
             <Link href="/ai" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">AI Curated</Link>
-            <Link href="/dashboard" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Trending</Link>
+            <Link href="/dashboard" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Analytics</Link>
             <Link href="/about" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">About</Link>
             <Link href="/contact" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Contact</Link>
             {/* <Link href="#" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">My List</Link> */}
