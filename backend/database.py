@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# MongoDB Connection
+# --- MongoDB Connection ---
 MONGO_URI = os.getenv("MONGO_URI")
 
 client = None
@@ -35,5 +35,24 @@ try:
 except Exception as e:
     print(f"❌ Failed to connect to MongoDB: {e}")
 
+# --- Neon PostgreSQL Connection (Netlify) ---
+# Netlify provides NETLIFY_DATABASE_URL for Neon integration
+PG_DATABASE_URL = os.getenv("NETLIFY_DATABASE_URL") or os.getenv("DATABASE_URL")
+
+pg_conn = None
+
+if PG_DATABASE_URL:
+    try:
+        import psycopg2
+        pg_conn = psycopg2.connect(PG_DATABASE_URL)
+        print("✅ Connected to Neon PostgreSQL")
+    except ImportError:
+        print("⚠️ psycopg2 not installed. PostgreSQL support limited.")
+    except Exception as e:
+        print(f"❌ Failed to connect to Neon PostgreSQL: {e}")
+
 def get_db():
     return db
+
+def get_pg_conn():
+    return pg_conn

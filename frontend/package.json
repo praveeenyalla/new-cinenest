@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@netlify/neon": "^0.1.0",
     "firebase": "^12.7.0",
     "framer-motion": "^12.23.26",
     "next": "latest",

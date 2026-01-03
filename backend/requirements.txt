@@ -13,3 +13,4 @@ groq
 google-generativeai
 scikit-learn
 google-search-results
+psycopg2-binary
