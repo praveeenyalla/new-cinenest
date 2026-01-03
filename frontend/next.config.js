@@ -5,7 +5,6 @@ const nextConfig = {
         unoptimized: true,
     },
     reactStrictMode: true,
-    /*
     async rewrites() {
         return [
             {
@@ -14,7 +13,6 @@ const nextConfig = {
             },
         ]
     },
-    */
 }
 
 module.exports = nextConfig
