@@ -10,6 +10,15 @@ export default function UserManagement() {
     const [totalPages, setTotalPages] = useState(1);
     const [filterStatus, setFilterStatus] = useState('all');
 
+    // Edit Modal State
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState(null);
+    const [editFormData, setEditFormData] = useState({
+        subscription_tier: 'Free',
+        account_status: 'Active'
+    });
+    const [updating, setUpdating] = useState(false);
+
     useEffect(() => {
         fetchUsers();
     }, [page]);
@@ -17,7 +26,7 @@ export default function UserManagement() {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('userToken');
+            const token = localStorage.getItem('userToken') || localStorage.getItem('adminToken');
             const res = await fetch(`${API_URL}/admin/user-analytics?page=${page}&limit=10`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -30,6 +39,43 @@ export default function UserManagement() {
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleEdit = (user) => {
+        setEditingUser(user);
+        setEditFormData({
+            subscription_tier: user.subscription_tier || 'Free',
+            account_status: user.account_status || 'Active'
+        });
+        setIsEditModalOpen(true);
+    };
+
+    const handleUpdateUser = async (e) => {
+        e.preventDefault();
+        setUpdating(true);
+        try {
+            const token = localStorage.getItem('userToken') || localStorage.getItem('adminToken');
+            const response = await fetch(`${API_URL}/admin/user/${editingUser._id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(editFormData)
+            });
+
+            if (response.ok) {
+                await fetchUsers();
+                setIsEditModalOpen(false);
+            } else {
+                alert('Failed to update user');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error updating user');
+        } finally {
+            setUpdating(false);
         }
     };
 
@@ -94,7 +140,7 @@ export default function UserManagement() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white shadow-lg shadow-cyan-500/20">
-                                                    {user.username.charAt(0).toUpperCase()}
+                                                    {user.username ? user.username.charAt(0).toUpperCase() : '?'}
                                                 </div>
                                                 <div>
                                                     <div className="text-white font-medium">{user.username}</div>
@@ -115,7 +161,12 @@ export default function UserManagement() {
                                         </td>
                                         <td className="px-6 py-4 font-mono text-xs">{new Date(user.joined_date).toLocaleDateString()}</td>
                                         <td className="px-6 py-4 text-right">
-                                            <button className="text-gray-500 hover:text-white text-xs px-2">Edit</button>
+                                            <button
+                                                onClick={() => handleEdit(user)}
+                                                className="text-gray-500 hover:text-white text-xs px-2 transition-colors"
+                                            >
+                                                Edit
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -145,6 +196,61 @@ export default function UserManagement() {
                     </div>
                 </main>
             </div>
+
+            {/* Edit Modal */}
+            {isEditModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-[#0f0f0f] border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-xl font-bold text-white">Edit User Plan</h3>
+                                <p className="text-xs text-gray-500 mt-1">Updating {editingUser?.username}</p>
+                            </div>
+                            <button onClick={() => setIsEditModalOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleUpdateUser} className="p-6 space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Subscription Plan</label>
+                                <select
+                                    value={editFormData.subscription_tier}
+                                    onChange={(e) => setEditFormData({ ...editFormData, subscription_tier: e.target.value })}
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors appearance-none"
+                                >
+                                    <option value="Free">Free</option>
+                                    <option value="Basic">Basic</option>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Premium">Premium</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Account Status</label>
+                                <select
+                                    value={editFormData.account_status}
+                                    onChange={(e) => setEditFormData({ ...editFormData, account_status: e.target.value })}
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors appearance-none"
+                                >
+                                    <option value="Active">Active</option>
+                                    <option value="Banned">Banned</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={updating}
+                                className="w-full bg-primary hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95 disabled:opacity-50"
+                            >
+                                {updating ? 'Updating...' : 'Save Changes'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             <style jsx>{`
                 .glass-panel {
                     background: rgba(10, 10, 10, 0.6);

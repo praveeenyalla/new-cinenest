@@ -10,6 +10,12 @@ import {
     LineChart, Line
 } from 'recharts';
 
+const cleanTitle = (title) => {
+    if (!title) return '';
+    // Removes trailing space followed by a single digit (synthetic data suffix)
+    return title.replace(/\s\d$/, '');
+};
+
 export default function MovieAnalytics() {
     const [filters, setFilters] = useState({
         release_year: 'All',
@@ -71,6 +77,17 @@ export default function MovieAnalytics() {
         }
         setSortConfig({ key, direction });
     };
+
+    // --- Deduplication Logic ---
+    const deduplicatedData = useMemo(() => {
+        const seen = new Set();
+        return sortedData.filter(movie => {
+            const title = cleanTitle(movie.title);
+            if (seen.has(title)) return false;
+            seen.add(title);
+            return true;
+        });
+    }, [sortedData]);
 
     // KPI Calculations
     const kpis = useMemo(() => {
@@ -213,7 +230,11 @@ export default function MovieAnalytics() {
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                             ))}
                                         </Pie>
-                                        <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }} />
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }}
+                                            itemStyle={{ color: '#fff' }}
+                                            labelStyle={{ color: '#fff' }}
+                                        />
                                         <Legend />
                                     </PieChart>
                                 </ResponsiveContainer>
@@ -229,7 +250,13 @@ export default function MovieAnalytics() {
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
                                         <XAxis dataKey="name" stroke="#666" fontSize={11} />
                                         <YAxis stroke="#666" fontSize={11} />
-                                        <Tooltip cursor={{ fill: 'rgba(0,196,159,0.1)' }} contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }} formatter={(v) => `$${v} M`} />
+                                        <Tooltip
+                                            cursor={{ fill: 'rgba(0,196,159,0.1)' }}
+                                            contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }}
+                                            itemStyle={{ color: '#fff' }}
+                                            labelStyle={{ color: '#fff' }}
+                                            formatter={(v) => `$${v} M`}
+                                        />
                                         <Bar dataKey="collection" fill="#00C49F" radius={[6, 6, 0, 0]} barSize={50} />
                                     </BarChart>
                                 </ResponsiveContainer>
@@ -245,7 +272,12 @@ export default function MovieAnalytics() {
                                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#333" />
                                         <XAxis type="number" stroke="#666" fontSize={11} />
                                         <YAxis dataKey="name" type="category" stroke="#666" fontSize={10} width={100} />
-                                        <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }} formatter={(v) => `$${v} M`} />
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }}
+                                            itemStyle={{ color: '#fff' }}
+                                            labelStyle={{ color: '#fff' }}
+                                            formatter={(v) => `$${v} M`}
+                                        />
                                         <Bar dataKey="collection" fill="#e50914" radius={[0, 6, 6, 0]} barSize={20} />
                                     </BarChart>
                                 </ResponsiveContainer>
@@ -261,7 +293,11 @@ export default function MovieAnalytics() {
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
                                         <XAxis dataKey="year" stroke="#666" fontSize={12} />
                                         <YAxis stroke="#666" fontSize={12} />
-                                        <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }}
+                                            itemStyle={{ color: '#fff' }}
+                                            labelStyle={{ color: '#fff' }}
+                                        />
                                         <Line type="monotone" dataKey="count" stroke="#e50914" strokeWidth={3} dot={{ fill: '#e50914', r: 6 }} activeDot={{ r: 8 }} />
                                     </LineChart>
                                 </ResponsiveContainer>
@@ -293,9 +329,9 @@ export default function MovieAnalytics() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-800">
-                                    {sortedData.map((movie) => (
+                                    {deduplicatedData.map((movie) => (
                                         <tr key={movie.movie_id} className="hover:bg-white/[0.03] transition-colors border-b border-gray-800/50">
-                                            <td className="px-6 py-4 font-bold text-white max-w-[200px] truncate">{movie.title}</td>
+                                            <td className="px-6 py-4 font-bold text-white max-w-[200px] truncate">{cleanTitle(movie.title)}</td>
                                             <td className="px-6 py-4">
                                                 <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${movie.industry === 'Hollywood' ? 'bg-blue-500/10 text-blue-400' :
                                                     movie.industry === 'Bollywood' ? 'bg-orange-500/10 text-orange-400' : 'bg-green-500/10 text-green-400'}`}>

@@ -63,7 +63,7 @@ export default function ContentManagement() {
 
                 // Combine
                 const combined = [...normalizedNewData, ...normalizedFinalData];
-                setContent(mapMovies(combined));
+                setContent(combined);
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to load data", err);

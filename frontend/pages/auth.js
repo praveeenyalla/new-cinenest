@@ -15,6 +15,8 @@ export default function AuthPage() {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Toggle Mode
     const toggleMode = () => {
@@ -214,15 +216,20 @@ export default function AuthPage() {
                                         <input
                                             id="password"
                                             name="password"
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
                                             required
                                             className="block w-full rounded-lg border-0 bg-[#271b1c] py-3 pl-10 pr-10 text-white ring-1 ring-inset ring-[#543b3c] placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-[#e60a15] sm:text-sm sm:leading-6 transition-all duration-200"
                                             placeholder="••••••••"
                                             value={formData.password}
                                             onChange={handleChange}
                                         />
-                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer group">
-                                            <span className="material-symbols-outlined text-gray-500 group-hover:text-gray-300 transition-colors text-[20px]">visibility</span>
+                                        <div
+                                            className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer group"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            <span className="material-symbols-outlined text-gray-500 group-hover:text-gray-300 transition-colors text-[20px]">
+                                                {showPassword ? 'visibility' : 'visibility_off'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -240,13 +247,21 @@ export default function AuthPage() {
                                             <input
                                                 id="confirm_password"
                                                 name="confirm_password"
-                                                type="password"
+                                                type={showConfirmPassword ? "text" : "password"}
                                                 required
                                                 className="block w-full rounded-lg border-0 bg-[#271b1c] py-3 pl-10 pr-10 text-white ring-1 ring-inset ring-[#543b3c] placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-[#e60a15] sm:text-sm sm:leading-6 transition-all duration-200"
                                                 placeholder="••••••••"
                                                 value={formData.confirm_password}
                                                 onChange={handleChange}
                                             />
+                                            <div
+                                                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer group"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            >
+                                                <span className="material-symbols-outlined text-gray-500 group-hover:text-gray-300 transition-colors text-[20px]">
+                                                    {showConfirmPassword ? 'visibility' : 'visibility_off'}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -291,7 +306,7 @@ export default function AuthPage() {
                                 </button>
                                 <button className="flex w-full items-center justify-center gap-3 rounded-lg bg-[#271b1c] px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-[#543b3c] hover:bg-[#342425] transition-colors">
                                     <svg aria-hidden="true" className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.684.81-1.813 1.586-2.998 1.586-.062 0-.125-.01-.187-.01-.225-1.12.38-2.316 1.054-3.13C13.731 2.15 15.114 1.397 16.365 1.43zm4.176 15.36c-.023.086-.046.17-.07.254-.813 3.235-2.73 6.64-4.896 6.947-1.928 2.366-4.085 2.502-5.462 2.502-1.376 0-3.535-.136-5.46-2.502-2.167-.307-4.084-3.712-4.896-6.946-.024-.085-.047-.17-.07-.255-2.167-8.705 2.188-14.88 2.188-14.88 2.528-2.458 6.06-2.502 6.06-2.502l.142.144c-.23.275-.41.6-.47 1.056-.038.283.076.544.298.68.22.136.5.115.7-.056l.167-.144c.917-.79 2.05-1.22 3.21-1.22 1.16 0 2.293.43 3.21 1.22l.166.144c.2.17.48.192.7.056.222-.136.336-.397.298-.68-.06-.456-.24-.78-.47-1.056l.142-.144s3.532.044 6.06 2.502c0 0 4.355 6.175 2.188 14.88z"></path>
+                                        <path d="M17.05 20.28c-.96 0-2.61-1.08-4.11-1.08-1.5 0-2.95 1.02-3.9 1.02-1.99 0-5.04-3.51-5.04-7.51 0-3.9 2.4-6.02 4.71-6.02 1.23 0 2.37.84 3.12.84s1.95-.9 3.33-.9c1.47 0 2.52.75 3.09 1.59-3.03 1.8-2.55 6.06.45 7.17-.66 1.77-1.53 3.51-3.15 3.51V20.28zM12.03 7.25c-.15-2.22 1.74-4.26 3.63-4.26.15 2.25-1.77 4.29-3.63 4.26z" />
                                     </svg>
                                     <span className="text-sm font-semibold leading-6">Apple</span>
                                 </button>

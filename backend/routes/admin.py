@@ -96,6 +96,33 @@ async def delete_user(user_id: str, admin: dict = Depends(get_current_admin)):
         pass
     return {"message": "User deleted successfully"}
 
+@router.put("/user/{user_id}")
+async def update_user(user_id: str, data: dict = Body(...), admin: dict = Depends(get_current_admin)):
+    if database.user_analytics_collection is None:
+        raise HTTPException(status_code=500, detail="Database not connected")
+    try:
+        from bson.objectid import ObjectId
+        update_data = {}
+        if "subscription_tier" in data:
+            update_data["subscription_tier"] = data["subscription_tier"]
+        if "account_status" in data:
+            update_data["account_status"] = data["account_status"]
+            
+        if not update_data:
+            return {"message": "No data to update"}
+
+        result = database.user_analytics_collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+            
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "User updated successfully"}
+
 # --- Dashboard Stats ---
 @router.get("/stats")
 async def get_dashboard_stats(admin: dict = Depends(get_current_admin)):
