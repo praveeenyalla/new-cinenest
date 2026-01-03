@@ -1,10 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // output: 'export', // Disabled to allow API proxying in Dev Tunnels
+    output: 'export',
     images: {
         unoptimized: true,
     },
     reactStrictMode: true,
+    /*
     async rewrites() {
         return [
             {
@@ -13,6 +14,7 @@ const nextConfig = {
             },
         ]
     },
+    */
 }
 
 module.exports = nextConfig
